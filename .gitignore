@@ -1,0 +1,16 @@
+.dub
+docs.json
+__dummy.html
+/similarity-d
+similarity-d.so
+similarity-d.dylib
+similarity-d.dll
+similarity-d.a
+similarity-d.lib
+similarity-d-test-*
+*.exe
+*.pdb
+*.o
+*.obj
+*.lst
+bin/
