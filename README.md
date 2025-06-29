@@ -1,7 +1,7 @@
 # similarity-d
 
 similarity-d is a command-line tool written in D for finding similar functions in a project.
-It uses a Tree Edit Distance (TED) algorithm to compare normalized abstract syntax trees as described in [Proposal 0005](docs/design/proposals/0005-tree-edit-module.md).
+It uses a Tree Edit Distance (TED) algorithm to compare normalized abstract syntax trees.
 
 ## Usage
 
