@@ -525,6 +525,29 @@ int bar(){ int b = 1; return b; }
     assert(isClose(sim, 1.0));
 }
 
+/// Operator change should differ by exactly one node
+unittest
+{
+    import dmd.frontend : initDMD, deinitializeDMD;
+    import std.math : isClose;
+    import std.algorithm : max;
+
+    initDMD();
+    scope(exit) deinitializeDMD();
+
+    string code = q{
+int foo(int x, int y){ return x + y; }
+int bar(int x, int y){ return x - y; }
+};
+    auto funcs = collectFunctionsFromSource("op.d", code);
+    assert(funcs.length == 2);
+    auto sim = treeSimilarity(funcs[0], funcs[1]);
+    auto sizeA = treeSize(normalizedAst(funcs[0])) - 1;
+    auto sizeB = treeSize(normalizedAst(funcs[1])) - 1;
+    auto expected = 1 - 1.0 / max(sizeA, sizeB);
+    assert(isClose(sim, expected));
+}
+
 /// Literal differences should have minimal impact
 unittest
 {
