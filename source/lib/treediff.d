@@ -525,6 +525,26 @@ int bar(){ int b = 1; return b; }
     assert(isClose(sim, 1.0));
 }
 
+/// Binary operator change should keep similarity high
+unittest
+{
+    import dmd.frontend : initDMD, deinitializeDMD;
+    import std.math : isClose;
+
+    initDMD();
+    scope(exit) deinitializeDMD();
+
+    string code = q{
+int foo(int x){ return x + 1; }
+int bar(int x){ return x - 1; }
+};
+    auto funcs = collectFunctionsFromSource("op.d", code);
+    assert(funcs.length == 2);
+    auto sim = treeSimilarity(funcs[0], funcs[1]);
+    // Only the operator differs -> expect high similarity (~0.8)
+    assert(isClose(sim, 0.8, 0.01));
+}
+
 /// Literal differences should have minimal impact
 unittest
 {
