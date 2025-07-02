@@ -64,8 +64,35 @@ unittest
     {
         return Node(k, v, []);
     }
-    auto a = Node(NodeKind.Other, "", [leaf(NodeKind.Identifier, "<id>"), leaf(NodeKind.Literal, "<lit>")]);
-    auto b = Node(NodeKind.Other, "", [leaf(NodeKind.Identifier, "<id>"), leaf(NodeKind.Literal, "<lit>"), leaf(NodeKind.Keyword, "if")]);
+    auto a = Node(NodeKind.Other, "",
+        [leaf(NodeKind.Identifier, "<id>"),
+         leaf(NodeKind.Literal, "<lit>")]);
+    auto b = Node(NodeKind.Other, "",
+        [leaf(NodeKind.Identifier, "<id>"),
+         leaf(NodeKind.Literal, "<lit>"),
+         leaf(NodeKind.Keyword, "if")]);
     assert(ted(a, a) == 0);
     assert(ted(a, b) == 1); // one insertion
+
+    // Deleting a subtree should cost its size (3 nodes here).
+    auto complex = Node(NodeKind.Other, "",
+        [Node(NodeKind.Other, "",
+            [leaf(NodeKind.Identifier, "x"),
+             leaf(NodeKind.Literal, "1")]),
+         leaf(NodeKind.Keyword, "if")]);
+    auto withoutSub = Node(NodeKind.Other, "",
+        [leaf(NodeKind.Keyword, "if")]);
+    assert(ted(complex, withoutSub) == 3);
+
+    // Replacing a child's label costs 1 when structure is the same.
+    auto c = Node(NodeKind.Other, "",
+        [leaf(NodeKind.Identifier, "a"),
+         leaf(NodeKind.Literal, "lit")]);
+    auto d = Node(NodeKind.Other, "",
+        [leaf(NodeKind.Identifier, "b"),
+         leaf(NodeKind.Literal, "lit")]);
+    assert(ted(c, d) == 1);
+
+    // Symmetry property.
+    assert(ted(a, b) == ted(b, a));
 }
