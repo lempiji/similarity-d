@@ -69,3 +69,40 @@ unittest
     assert(ted(a, a) == 0);
     assert(ted(a, b) == 1); // one insertion
 }
+
+unittest
+{
+    Node leaf(NodeKind k, string v)
+    {
+        return Node(k, v, []);
+    }
+
+    auto original = Node(NodeKind.Other, "", [
+        leaf(NodeKind.Identifier, "<id>"),
+        leaf(NodeKind.Literal, "<lit>")
+    ]);
+    auto removed = Node(NodeKind.Other, "", [
+        leaf(NodeKind.Identifier, "<id>")
+    ]);
+
+    assert(ted(original, removed) == 1); // one deletion
+}
+
+unittest
+{
+    Node leaf(NodeKind k, string v)
+    {
+        return Node(k, v, []);
+    }
+
+    auto original = Node(NodeKind.Other, "", [
+        leaf(NodeKind.Identifier, "<id>"),
+        leaf(NodeKind.Literal, "<lit>")
+    ]);
+    auto replaced = Node(NodeKind.Other, "", [
+        leaf(NodeKind.Keyword, "for"),
+        leaf(NodeKind.Literal, "<lit>")
+    ]);
+
+    assert(ted(original, replaced) == 1); // one replacement
+}
