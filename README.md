@@ -73,3 +73,22 @@ $ dub run -- --dir samples/threshold --threshold=0.3 --min-tokens=0 --cross-file
 samples/threshold\a.d:1-7 <-> samples/threshold\a.d:9-17 score=0.346939 priority=3.12245
 ```
 
+## Development
+
+Run the full test suite before sending a pull request.  The project expects
+coverage information to be generated and kept above 70% for each module.
+
+```bash
+dub test --coverage --coverage-ctfe
+```
+
+After running tests, inspect the `source-*.lst` files and confirm the final two
+lines show coverage of at least 70%.
+
+To verify the command line interface still works, invoke it with a minimal
+configuration:
+
+```bash
+dub run -- --dir source/lib --exclude-unittests --threshold=0.9 --min-lines=3
+```
+

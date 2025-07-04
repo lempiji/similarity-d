@@ -5,20 +5,38 @@ import std.range : isOutputRange, put;
 import functioncollector : FunctionInfo, collectFunctionsFromSource;
 import treediff : treeSimilarity, normalizedTokenCount;
 
-/// Pair of matching functions with similarity score and priority.
+/**
+ * Detailed information about a detected match between two functions.
+ *
+ *  Fields prefixed with `A` refer to the first function in the pair and those
+ *  with `B` refer to the second.  `priority` is calculated as
+ *  `max(linesA, linesB) * similarity` and is used when sorting results.
+ */
 struct CrossMatch
 {
+    /// Path to the first function's source file.
     string fileA;
+    /// Starting line of the first function.
     size_t startA;
+    /// Ending line of the first function.
     size_t endA;
+    /// Path to the second function's source file.
     string fileB;
+    /// Starting line of the second function.
     size_t startB;
+    /// Ending line of the second function.
     size_t endB;
+    /// Number of lines in the first function.
     size_t linesA;
+    /// Number of lines in the second function.
     size_t linesB;
+    /// Calculated similarity score between the two functions.
     double similarity;
-    double priority; // max(linesA, linesB) * similarity
+    /// Ranking metric used when ordering matches.
+    double priority;
+    /// Raw source snippet of the first function.
     string snippetA;
+    /// Raw source snippet of the second function.
     string snippetB;
 }
 
