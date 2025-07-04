@@ -331,3 +331,15 @@ unittest { assert(foo()); }
     assert(funcs.length == 1);
 }
 
+unittest
+{
+    // validate line slicing helper
+    string code = "a\nb\nc\nd";
+    assert(sliceLines(code, 2, 3) == "b\nc");
+    // boundary conditions
+    assert(sliceLines(code, 0, 2).length == 0);
+    assert(sliceLines(code, 1, 0).length == 0);
+    assert(sliceLines(code, 5, 6).length == 0);
+    assert(sliceLines(code, 3, 10) == "c\nd");
+}
+
