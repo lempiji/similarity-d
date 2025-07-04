@@ -25,7 +25,7 @@ void main(string[] args)
 {
     double threshold = 0.85;
     size_t minLines = 5;
-    size_t minTokens = 20;
+    size_t minNodes = 20;
     bool noSizePenalty = false;
     bool printResult = false;
     bool crossFile = true;
@@ -38,7 +38,7 @@ void main(string[] args)
         "print", &printResult,
         "no-size-penalty", &noSizePenalty,
         "cross-file", &crossFile,
-        "min-tokens", &minTokens,
+        "min-nodes", &minNodes,
         "dir", &dir,
         "exclude-unittests", &excludeUnittests
     );
@@ -54,7 +54,7 @@ void main(string[] args)
 
     auto funcs = collectFunctionsInDir(dir, !excludeUnittests);
     bool found = false;
-    collectMatches(funcs, threshold, minLines, minTokens,
+    collectMatches(funcs, threshold, minLines, minNodes,
             noSizePenalty, crossFile, (CrossMatch m)
     {
         found = true;

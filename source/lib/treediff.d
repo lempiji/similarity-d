@@ -1,68 +1,8 @@
 module treediff;
 
-import std.algorithm : min, max, canFind;
-import std.array : array;
-import std.ascii : isAlpha, isAlphaNum, isDigit;
-import std.string : split, toLower;
-import std.conv : to;
-
+import std.algorithm : min, max;
 import functioncollector : FunctionInfo, collectFunctionsFromSource;
 import treedistance : Node, NodeKind, ted, treeSize;
-
-private immutable string[] keywords = [
-    "if", "else", "for", "while", "switch", "case", "default",
-    "break", "continue", "return", "int", "double", "float", "char",
-    "void", "auto", "struct", "class", "enum", "import", "public",
-    "private", "protected", "export", "static", "const", "immutable",
-    "version", "debug", "with", "goto", "try", "catch", "throw",
-    "interface", "template", "alias", "asm", "pragma", "package",
-    "module", "nothrow", "pure", "shared", "synchronized", "foreach",
-    "foreach_reverse", "in", "out", "ref", "do", "new"
-];
-
-private bool isIdentifier(string tok)
-{
-    if (tok.length == 0)
-        return false;
-    if (!tok[0].isAlpha && tok[0] != '_')
-        return false;
-    foreach (c; tok[1 .. $])
-        if (!c.isAlphaNum && c != '_')
-            return false;
-    return !keywords.canFind(toLower(tok));
-}
-
-private bool isLiteral(string tok)
-{
-    if (tok.length == 0)
-        return false;
-    if (tok[0] == '"' || tok[0] == '\'' )
-        return true;
-    return tok[0].isDigit;
-}
-
-public string[] normalizeTokens(string normalized)
-{
-    string[] toks = normalized.split();
-    foreach (ref t; toks)
-    {
-        if (isIdentifier(t))
-            t = "<id>";
-        else if (isLiteral(t))
-            t = "<lit>";
-    }
-    return toks;
-}
-
-public size_t normalizedTokenCount(string normalized)
-{
-    return normalizeTokens(normalized).length;
-}
-
-public size_t normalizedTokenCount(FunctionInfo f)
-{
-    return normalizedTokenCount(f.normalized);
-}
 
 import dmd.frontend : parseModule;
 import dmd.statement : Statement, CompoundStatement, IfStatement, WhileStatement,
@@ -397,6 +337,13 @@ public Node normalizedAst(FunctionInfo f)
     return Node(NodeKind.Other, "root", children);
 }
 
+/// Return the number of AST nodes in the normalized tree for `f`.
+public size_t nodeCount(FunctionInfo f)
+{
+    // subtract one to ignore the artificial root node
+    return treeSize(normalizedAst(f)) - 1;
+}
+
 unittest
 {
     import dmd.frontend : initDMD, deinitializeDMD;
@@ -418,6 +365,22 @@ int foo(){ return 1; }
     assert(c.children[0].kind == NodeKind.Keyword);
     assert(c.children[0].children.length == 1);
     assert(c.children[0].children[0].kind == NodeKind.Literal);
+}
+
+unittest
+{
+    import dmd.frontend : initDMD, deinitializeDMD;
+
+    initDMD();
+    scope(exit) deinitializeDMD();
+
+    string code = q{
+int foo(){ return 1; }
+};
+    auto funcs = collectFunctionsFromSource("count.d", code);
+    assert(funcs.length == 1);
+    auto ast = normalizedAst(funcs[0]);
+    assert(nodeCount(funcs[0]) == treeSize(ast) - 1);
 }
 
 /// ensure exprToNode covers additional expression forms
@@ -809,4 +772,21 @@ int bar(int n){ int i=0; while(i<n){ ++i; } return i; }
     import std.math : isClose;
     // do-while vs while loops retain partial structural similarity
     assert(isClose(sim, 0.461538, 0.01));
+}
+
+unittest
+{
+    import dmd.frontend : initDMD, deinitializeDMD;
+    import std.math : isClose;
+
+    initDMD();
+    scope(exit) deinitializeDMD();
+
+    string code = q{
+int a(){ return 0; }
+int b(){ return 1; }
+};
+    auto funcs = collectFunctionsFromSource("penalty.d", code);
+    auto sim = treeSimilarity(funcs[0], funcs[1], false);
+    assert(sim >= 0 && sim <= 1);
 }

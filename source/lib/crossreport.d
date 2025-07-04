@@ -3,7 +3,7 @@ module crossreport;
 import std.algorithm : sort, max;
 import std.range : isOutputRange, put;
 import functioncollector : FunctionInfo, collectFunctionsFromSource;
-import treediff : treeSimilarity, normalizedTokenCount;
+import treediff : treeSimilarity, nodeCount;
 
 /**
  * Detailed information about a detected match between two functions.
@@ -42,14 +42,14 @@ struct CrossMatch
 
 /// Generate cross matches from collected functions and output each match via `sink`.
 void collectMatches(Sink)(FunctionInfo[] funcs, double threshold, size_t minLines,
-        size_t minTokens, bool noSizePenalty, bool crossFile, auto ref Sink sink)
+        size_t minNodes, bool noSizePenalty, bool crossFile, auto ref Sink sink)
     if (isOutputRange!(Sink, CrossMatch))
 {
     CrossMatch[] matches;
-    size_t[FunctionInfo] tokenCountCache;
+    size_t[FunctionInfo] nodeCountCache;
     foreach (f; funcs)
     {
-        tokenCountCache[f] = normalizedTokenCount(f);
+        nodeCountCache[f] = nodeCount(f);
     }
 
     foreach (i, f1; funcs)
@@ -57,7 +57,7 @@ void collectMatches(Sink)(FunctionInfo[] funcs, double threshold, size_t minLine
         auto len1 = f1.endLine - f1.startLine + 1;
         if (len1 < minLines)
             continue;
-        if (tokenCountCache[f1] < minTokens)
+        if (nodeCountCache[f1] < minNodes)
         {
             continue;
         }
@@ -67,7 +67,7 @@ void collectMatches(Sink)(FunctionInfo[] funcs, double threshold, size_t minLine
             auto len2 = f2.endLine - f2.startLine + 1;
             if (len2 < minLines)
                 continue;
-            if (tokenCountCache[f2] < minTokens)
+            if (nodeCountCache[f2] < minNodes)
                 continue;
             if (!crossFile && f1.file != f2.file)
                 continue;

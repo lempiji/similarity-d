@@ -15,7 +15,7 @@ dub run similarity-d -- [options]
 - `--dir` &lt;path&gt;  Directory to search for `.d` source files (defaults to current directory).
 - `--threshold` &lt;float&gt;  Similarity threshold used to decide matches.
 - `--min-lines` &lt;integer&gt;  Minimum number of lines in a function to be considered.
-- `--min-tokens` &lt;integer&gt;  Minimum number of normalized tokens (default 30).
+- `--min-nodes` &lt;integer&gt;  Minimum number of normalized AST nodes (default 30).
 - `--no-size-penalty`  Disable length penalty when computing similarity.
 - `--print`  Print the snippet of each function when reporting results.
 - `--cross-file`[=true|false]  Allow comparison across different files (default `true`). Use `--cross-file=false` to limit comparisons within each file.
@@ -44,16 +44,16 @@ contains a couple of `.d` files and a short README describing the scenario.
 
 ### `samples/basic`
 
-This directory has two almost identical functions. Lower the token filter to
+This directory has two almost identical functions. Lower the node filter to
 see the match:
 
 ```bash
-$ dub run -- --dir samples/basic --min-tokens=0
+$ dub run -- --dir samples/basic --min-nodes=0
 samples/basic\file_a.d:3-9 <-> samples/basic\file_b.d:3-9 score=1 priority=7
 samples/basic\file_a.d:20-26 <-> samples/basic\file_b.d:20-26 score=1 priority=7
 ```
 
-Running without `--min-tokens=0` prints nothing because the default value of 20
+Running without `--min-nodes=0` prints nothing because the default value of 20
 filters out these tiny functions.
 
 ### `samples/threshold`
@@ -69,7 +69,7 @@ No similar functions found.
 Lowering the threshold reveals a partial match:
 
 ```bash
-$ dub run -- --dir samples/threshold --threshold=0.3 --min-tokens=0 --cross-file=false
+$ dub run -- --dir samples/threshold --threshold=0.3 --min-nodes=0 --cross-file=false
 samples/threshold\a.d:1-7 <-> samples/threshold\a.d:9-17 score=0.346939 priority=3.12245
 ```
 
