@@ -329,6 +329,9 @@ private Node stmtToNode(Statement s)
     return Node(NodeKind.Other, "stmt", []);
 }
 
+/// Convert a `FunctionInfo` instance into a simplified AST used for similarity
+/// comparisons.  Identifiers and literals are normalized and the resulting tree
+/// is rooted at a single placeholder node.
 public Node normalizedAst(FunctionInfo f)
 {
     Node[] children;
@@ -417,6 +420,10 @@ C foo(){
     assert(contains(ast, "assert"));
 }
 
+/// Compute a similarity score between two functions using tree edit distance.
+/// When `sizePenalty` is enabled the result is scaled by the ratio of the
+/// smaller tree size to the larger one so that very small functions do not
+/// receive disproportionately high scores.
 public double treeSimilarity(FunctionInfo a, FunctionInfo b, bool sizePenalty=true)
 {
     auto ta = normalizedAst(a);
