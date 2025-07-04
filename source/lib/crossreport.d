@@ -3,7 +3,7 @@ module crossreport;
 import std.algorithm : sort, max;
 import std.range : isOutputRange, put;
 import functioncollector : FunctionInfo, collectFunctionsFromSource;
-import treediff : treeSimilarity, normalizedTokenCount;
+import treediff : treeSimilarity, nodeCount;
 
 /**
  * Detailed information about a detected match between two functions.
@@ -46,10 +46,10 @@ void collectMatches(Sink)(FunctionInfo[] funcs, double threshold, size_t minLine
     if (isOutputRange!(Sink, CrossMatch))
 {
     CrossMatch[] matches;
-    size_t[FunctionInfo] tokenCountCache;
+    size_t[FunctionInfo] nodeCountCache;
     foreach (f; funcs)
     {
-        tokenCountCache[f] = normalizedTokenCount(f);
+        nodeCountCache[f] = nodeCount(f);
     }
 
     foreach (i, f1; funcs)
@@ -57,7 +57,7 @@ void collectMatches(Sink)(FunctionInfo[] funcs, double threshold, size_t minLine
         auto len1 = f1.endLine - f1.startLine + 1;
         if (len1 < minLines)
             continue;
-        if (tokenCountCache[f1] < minTokens)
+        if (nodeCountCache[f1] < minTokens)
         {
             continue;
         }
@@ -67,7 +67,7 @@ void collectMatches(Sink)(FunctionInfo[] funcs, double threshold, size_t minLine
             auto len2 = f2.endLine - f2.startLine + 1;
             if (len2 < minLines)
                 continue;
-            if (tokenCountCache[f2] < minTokens)
+            if (nodeCountCache[f2] < minTokens)
                 continue;
             if (!crossFile && f1.file != f2.file)
                 continue;

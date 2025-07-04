@@ -15,7 +15,7 @@ dub run similarity-d -- [options]
 - `--dir` &lt;path&gt;  Directory to search for `.d` source files (defaults to current directory).
 - `--threshold` &lt;float&gt;  Similarity threshold used to decide matches.
 - `--min-lines` &lt;integer&gt;  Minimum number of lines in a function to be considered.
-- `--min-tokens` &lt;integer&gt;  Minimum number of normalized tokens (default 30).
+- `--min-tokens` &lt;integer&gt;  Minimum number of normalized AST nodes (default 20).
 - `--no-size-penalty`  Disable length penalty when computing similarity.
 - `--print`  Print the snippet of each function when reporting results.
 - `--cross-file`[=true|false]  Allow comparison across different files (default `true`). Use `--cross-file=false` to limit comparisons within each file.
