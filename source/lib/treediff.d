@@ -810,3 +810,17 @@ int bar(int n){ int i=0; while(i<n){ ++i; } return i; }
     // do-while vs while loops retain partial structural similarity
     assert(isClose(sim, 0.461538, 0.01));
 }
+
+/// Basic tokenization helpers
+unittest
+{
+    // identifiers and literals should be replaced while keywords remain
+    string norm = "foo 42 return";
+    auto tokens = normalizeTokens(norm);
+    assert(tokens == ["<id>", "<lit>", "return"]);
+    assert(normalizedTokenCount(norm) == 3);
+
+    FunctionInfo f;
+    f.normalized = norm;
+    assert(normalizedTokenCount(f) == 3);
+}
