@@ -40,7 +40,18 @@ struct CrossMatch
     string snippetB;
 }
 
-/// Generate cross matches from collected functions and output each match via `sink`.
+/**
+ * Generate cross matches from the given set of functions.
+ *
+ * Params:
+ *   funcs = Array of functions to compare.
+ *   threshold = Minimum similarity score required to report a match.
+ *   minLines = Skip functions shorter than this many lines.
+ *   minTokens = Skip functions whose normalized AST has fewer tokens.
+ *   noSizePenalty = If true, disable the length penalty applied during similarity calculation.
+ *   crossFile = When false, only compare functions that originate from the same file.
+ *   sink = Output range that receives each `CrossMatch` result.
+ */
 void collectMatches(Sink)(FunctionInfo[] funcs, double threshold, size_t minLines,
         size_t minTokens, bool noSizePenalty, bool crossFile, auto ref Sink sink)
     if (isOutputRange!(Sink, CrossMatch))
