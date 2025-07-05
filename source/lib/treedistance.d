@@ -6,10 +6,15 @@ import std.typecons : Tuple;
 /// Kinds of AST nodes used for tree edit distance.
 public enum NodeKind
 {
+    /// Node representing a variable or function name.
     Identifier,
+    /// Node representing a numeric or string literal.
     Literal,
+    /// Node for language keywords such as `if` or `return`.
     Keyword,
+    /// Node for operators like `+`, `-` or `*`.
     Operator,
+    /// Fallback node type for uncategorized tokens.
     Other
 }
 
