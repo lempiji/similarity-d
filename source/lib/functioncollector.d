@@ -30,6 +30,22 @@ public struct FunctionInfo
     FuncDeclaration funcDecl;
 }
 
+/// RAII helper that toggles `global.params.useUnitTests` for the lifetime of
+/// the instance.
+private struct UnitTestFlagGuard
+{
+    this(bool enabled)
+    {
+        _prev = global.params.useUnitTests;
+        global.params.useUnitTests = enabled;
+    }
+    ~this()
+    {
+        global.params.useUnitTests = _prev;
+    }
+    private bool _prev;
+}
+
 /// Strip comments and whitespace from a snippet.
 private string normalizeCode(string code)
 {
@@ -109,9 +125,7 @@ private FunctionInfo[] collectFunctions(Module mod, string code, bool includeUni
 /// Parse `code` and collect all functions it contains
 public FunctionInfo[] collectFunctionsFromSource(string filename, string code, bool includeUnittests = true)
 {
-    auto prev = global.params.useUnitTests;
-    scope(exit) global.params.useUnitTests = prev;
-    global.params.useUnitTests = includeUnittests;
+    scope UnitTestFlagGuard guard = UnitTestFlagGuard(includeUnittests);
 
     auto t = parseModule(filename, code);
     return collectFunctions(t.module_, code, includeUnittests);
@@ -120,9 +134,7 @@ public FunctionInfo[] collectFunctionsFromSource(string filename, string code, b
 /// Parse a D source file and collect its functions
 public FunctionInfo[] collectFunctionsInFile(string path, bool includeUnittests = true)
 {
-    auto prev = global.params.useUnitTests;
-    scope(exit) global.params.useUnitTests = prev;
-    global.params.useUnitTests = includeUnittests;
+    scope UnitTestFlagGuard guard = UnitTestFlagGuard(includeUnittests);
 
     auto t = parseModule(path);
     auto mod = t.module_;
@@ -134,9 +146,7 @@ public FunctionInfo[] collectFunctionsInFile(string path, bool includeUnittests 
 public FunctionInfo[] collectFunctionsInDir(string dir, bool includeUnittests = true)
 {
     FunctionInfo[] results;
-    auto prev = global.params.useUnitTests;
-    scope(exit) global.params.useUnitTests = prev;
-    global.params.useUnitTests = includeUnittests;
+    scope UnitTestFlagGuard guard = UnitTestFlagGuard(includeUnittests);
 
     foreach (entry; dirEntries(dir, "*.d", SpanMode.depth))
     {
