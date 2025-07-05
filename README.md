@@ -4,6 +4,12 @@
 similarity-d is a command-line tool written in D for finding similar functions in a project.
 It uses a Tree Edit Distance (TED) algorithm to compare normalized abstract syntax trees.
 
+## Prerequisites
+
+The tool requires **DMD** 2.111.0 or newer and relies on `dub` being available in your `PATH`.
+If the compiler is not installed, use the official `install.sh` script or Windows installer provided by the D language project.
+After installation, run `dub --version` to confirm the tool chain is accessible.
+
 ## Usage
 
 ```
