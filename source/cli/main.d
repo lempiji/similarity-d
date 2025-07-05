@@ -1,3 +1,6 @@
+/// Command line interface for detecting similar functions in D source trees.
+/// Supports `--dir`, `--threshold`, `--min-lines`, `--min-tokens` and related
+/// flags. See the README for complete usage instructions.
 module cli.main;
 
 import std.stdio : writeln;
