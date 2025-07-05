@@ -54,3 +54,22 @@ The CLI (`source/cli/main.d`) wires these pieces together. Tests for each module
 5. Use clear commit messages explaining *why* a change is made.
 
 Following these guidelines keeps the codebase maintainable and ensures design decisions remain traceable.
+
+## Dependency Maintenance (DUB)
+
+Periodically refresh DUB dependencies while keeping the workflow simple.
+
+1. Run `dub upgrade` in the repository root. This updates `dub.selections.json` to the latest versions permitted by `dub.json` or `dub.sdl`.
+2. When a newer major version is desired, run `dub add <package>` to change the version range, then repeat `dub upgrade`.
+3. Execute the tests:
+   ```bash
+   dub test --coverage --coverage-ctfe
+   ```
+   Ensure every `source-*.lst` file ends with **70%** coverage or higher.
+4. Verify the CLI still works:
+   ```bash
+   dub run -- --dir source/lib --exclude-unittests --threshold=0.9 --min-lines=3
+   ```
+5. Commit the updated `dub.selections.json` and any modified manifest files. Document major version bumps when behaviour changes.
+
+This workflow keeps dependencies current while ensuring upgrades do not break existing functionality.
