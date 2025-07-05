@@ -57,6 +57,14 @@ private string sliceLines(string code, uint startLine, uint endLine)
     return to!string(lines[startLine - 1 .. endLine].joiner("\n").array);
 }
 
+/// Recursively traverse a symbol tree and collect all function declarations.
+///
+/// Params:
+///   s = symbol to start traversal from
+///   source = full source text the symbols originate from
+///   results = array receiving discovered `FunctionInfo`
+///   includeUnittests = whether to include `unittest` functions
+
 private void collectFrom(Dsymbol s, string source, ref FunctionInfo[] results, bool includeUnittests)
 {
     if (auto fd = s.isFuncDeclaration())
