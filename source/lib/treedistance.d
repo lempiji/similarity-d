@@ -23,8 +23,11 @@ public enum NodeKind
 /// Simple tree node for TED.
 public struct Node
 {
+    /// Classification used by the distance algorithm.
     NodeKind kind;
+    /// Normalized identifier or literal text.
     string value;
+    /// Child nodes that form the subtree.
     Node[] children;
 }
 
