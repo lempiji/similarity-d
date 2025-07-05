@@ -239,3 +239,36 @@ int bar(){
         (CrossMatch m){ matches ~= m; });
     assert(matches.length == 1, "disabling penalty should allow match");
 }
+
+unittest
+{
+    import dmd.frontend : initDMD, deinitializeDMD;
+
+    initDMD();
+    scope(exit) deinitializeDMD();
+
+    string code = q{
+int foo(){ return 1; }
+int bar(){ return 2; }
+};
+    auto funcs = collectFunctionsFromSource("tok.d", code);
+
+    auto len1 = funcs[0].endLine - funcs[0].startLine + 1;
+    auto len2 = funcs[1].endLine - funcs[1].startLine + 1;
+    auto tokens1 = nodeCount(funcs[0]);
+    auto tokens2 = nodeCount(funcs[1]);
+
+    size_t tooLong = max(len1, len2) + 1;
+    size_t tooManyTokens = max(tokens1, tokens2) + 1;
+
+    CrossMatch[] matches;
+    collectMatches(funcs, 0.0, tooLong, tooManyTokens, false, true,
+        (CrossMatch m){ matches ~= m; });
+    assert(matches.length == 0);
+
+    matches.length = 0;
+    collectMatches(funcs, 0.0, 1, 1, false, true,
+        (CrossMatch m){ matches ~= m; });
+    assert(matches.length == 1);
+}
+
