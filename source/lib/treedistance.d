@@ -68,12 +68,17 @@ public size_t ted(Node a, Node b)
     return cost + dp[m][n];
 }
 
-unittest
+version(unittest)
 {
-    Node leaf(NodeKind k, string v)
+    /// Convenience helper for constructing a leaf node in tests.
+    private Node leaf(NodeKind k, string v)
     {
         return Node(k, v, []);
     }
+}
+
+unittest
+{
     auto a = Node(NodeKind.Other, "",
         [leaf(NodeKind.Identifier, "<id>"),
          leaf(NodeKind.Literal, "<lit>")]);
@@ -109,10 +114,7 @@ unittest
 
 unittest
 {
-    Node leaf(NodeKind k, string v)
-    {
-        return Node(k, v, []);
-    }
+
 
     auto original = Node(NodeKind.Other, "", [
         leaf(NodeKind.Identifier, "<id>"),
@@ -127,10 +129,7 @@ unittest
 
 unittest
 {
-    Node leaf(NodeKind k, string v)
-    {
-        return Node(k, v, []);
-    }
+
 
     auto original = Node(NodeKind.Other, "", [
         leaf(NodeKind.Identifier, "<id>"),
