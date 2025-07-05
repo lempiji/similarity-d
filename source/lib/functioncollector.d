@@ -10,6 +10,7 @@ import std.array : array;
 import std.algorithm : joiner;
 
 import dmd.frontend : parseModule, initDMD, deinitializeDMD;
+import dmd.dmodule : Module;
 import dmd.dsymbol : Dsymbol, ScopeDsymbol;
 import dmd.attrib : AttribDeclaration;
 import dmd.func : FuncDeclaration;
@@ -95,19 +96,25 @@ private void collectFrom(Dsymbol s, string source, ref FunctionInfo[] results, b
     }
 }
 
+/// Traverse the AST of `mod` and collect all functions.
+private FunctionInfo[] collectFunctions(Module mod, string code, bool includeUnittests)
+{
+    FunctionInfo[] result;
+    if (mod !is null && mod.members)
+        foreach (s; *mod.members)
+            collectFrom(s, code, result, includeUnittests);
+    return result;
+}
+
 /// Parse `code` and collect all functions it contains
 public FunctionInfo[] collectFunctionsFromSource(string filename, string code, bool includeUnittests = true)
 {
     auto prev = global.params.useUnitTests;
     scope(exit) global.params.useUnitTests = prev;
     global.params.useUnitTests = includeUnittests;
+
     auto t = parseModule(filename, code);
-    auto mod = t.module_;
-    FunctionInfo[] result;
-    if (mod.members)
-        foreach (s; *mod.members)
-            collectFrom(s, code, result, includeUnittests);
-    return result;
+    return collectFunctions(t.module_, code, includeUnittests);
 }
 
 /// Parse a D source file and collect its functions
@@ -116,14 +123,11 @@ public FunctionInfo[] collectFunctionsInFile(string path, bool includeUnittests 
     auto prev = global.params.useUnitTests;
     scope(exit) global.params.useUnitTests = prev;
     global.params.useUnitTests = includeUnittests;
+
     auto t = parseModule(path);
     auto mod = t.module_;
     auto code = readText(path);
-    FunctionInfo[] result;
-    if (mod.members)
-        foreach (s; *mod.members)
-            collectFrom(s, code, result, includeUnittests);
-    return result;
+    return collectFunctions(mod, code, includeUnittests);
 }
 
 /// Collect functions from all `.d` files under `dir`
