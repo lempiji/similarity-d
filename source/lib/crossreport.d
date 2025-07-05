@@ -204,3 +204,38 @@ int bar(){
     assert(matches[0].startB == funcs[1].startLine);
     assert(matches[0].similarity > 0.5 && matches[0].similarity < 0.9);
 }
+
+unittest
+{
+    import dmd.frontend : initDMD, deinitializeDMD;
+    initDMD();
+    scope(exit) deinitializeDMD();
+
+    string code = q{
+int foo(){
+    int x = 0;
+    for(int i = 0; i < 10; ++i)
+        x += i;
+    return x;
+}
+int bar(){
+    int x = 0;
+    for(int i = 0; i < 10; ++i)
+        x += i;
+    x += 1;
+    return x;
+}
+};
+
+    auto funcs = collectFunctionsFromSource("p.d", code);
+    CrossMatch[] matches;
+
+    collectMatches(funcs, 0.8, 1, 1, false, true,
+        (CrossMatch m){ matches ~= m; });
+    assert(matches.length == 0, "penalty should suppress match");
+
+    matches.length = 0;
+    collectMatches(funcs, 0.8, 1, 1, true, true,
+        (CrossMatch m){ matches ~= m; });
+    assert(matches.length == 1, "disabling penalty should allow match");
+}
