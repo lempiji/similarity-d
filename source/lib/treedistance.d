@@ -1,3 +1,5 @@
+/// Implements a basic tree edit distance algorithm over lightweight nodes.
+/// Defines `Node` and `NodeKind` utilities used by higher-level modules.
 module treedistance;
 
 import std.algorithm : min;

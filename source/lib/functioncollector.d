@@ -1,3 +1,6 @@
+/// Collects functions from D source code using the DMD front end.
+/// Provides utilities to traverse files or directories and return normalized
+/// `FunctionInfo` records.
 module functioncollector;
 
 import std.file : readText, dirEntries, SpanMode;
