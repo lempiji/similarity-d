@@ -8,6 +8,12 @@ version(unittest)
     import functioncollector;
     alias FunctionInfo = functioncollector.FunctionInfo;
     __gshared bool lastIncludeUnittests;
+    __gshared double lastThreshold;
+    __gshared size_t lastMinLines;
+    __gshared size_t lastMinTokens;
+    __gshared bool lastCrossFile;
+    __gshared bool lastNoSizePenalty;
+    __gshared bool lastPrintResult;
     FunctionInfo[] collectFunctionsInDir(string dir, bool includeUnittests = true)
     {
         lastIncludeUnittests = includeUnittests;
@@ -42,6 +48,16 @@ void main(string[] args)
         "dir", &dir,
         "exclude-unittests", &excludeUnittests
     );
+
+    version(unittest)
+    {
+        lastThreshold = threshold;
+        lastMinLines = minLines;
+        lastMinTokens = minTokens;
+        lastCrossFile = crossFile;
+        lastNoSizePenalty = noSizePenalty;
+        lastPrintResult = printResult;
+    }
 
     if (helpInfo.helpWanted)
     {
@@ -80,6 +96,21 @@ unittest
     lastIncludeUnittests = true;
     main(["app", "--dir", dir]);
     assert(lastIncludeUnittests == true);
-    main(["app", "--dir", dir, "--exclude-unittests"]);
+    assert(lastThreshold == 0.85);
+    assert(lastMinLines == 5);
+    assert(lastMinTokens == 20);
+    assert(lastCrossFile == true);
+    assert(lastNoSizePenalty == false);
+    assert(lastPrintResult == false);
+
+    main(["app", "--dir", dir, "--exclude-unittests",
+        "--threshold=0.9", "--min-lines=2", "--min-tokens=10",
+        "--cross-file=false", "--no-size-penalty", "--print"]);
     assert(lastIncludeUnittests == false);
+    assert(lastThreshold == 0.9);
+    assert(lastMinLines == 2);
+    assert(lastMinTokens == 10);
+    assert(lastCrossFile == false);
+    assert(lastNoSizePenalty == true);
+    assert(lastPrintResult == true);
 }
