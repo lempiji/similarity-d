@@ -343,3 +343,36 @@ unittest
     assert(sliceLines(code, 3, 10) == "c\nd");
 }
 
+unittest
+{
+    import dmd.frontend : initDMD, deinitializeDMD;
+    import std.file : tempDir, mkdir, rmdirRecurse, write;
+    import std.path : buildPath;
+    import std.datetime.systime : Clock;
+    import std.conv : to;
+
+    auto dir = buildPath(tempDir(), "fcdirtest-" ~ to!string(Clock.currTime().toUnixTime()));
+    mkdir(dir);
+    scope(exit) rmdirRecurse(dir);
+
+    write(buildPath(dir, "a.d"), "int foo(){ return 1; }");
+    write(buildPath(dir, "b.d"), "int bar(){ return 2; }\nunittest { assert(bar() == 2); }");
+
+    initDMD();
+    auto withUT = collectFunctionsInDir(dir);
+    deinitializeDMD();
+    assert(withUT.length == 3);
+    size_t utCount;
+    foreach(f; withUT)
+        if(f.funcDecl.isUnitTestDeclaration())
+            ++utCount;
+    assert(utCount == 1);
+
+    initDMD();
+    auto withoutUT = collectFunctionsInDir(dir, false);
+    deinitializeDMD();
+    assert(withoutUT.length == 2);
+    foreach(f; withoutUT)
+        assert(!f.funcDecl.isUnitTestDeclaration());
+}
+
