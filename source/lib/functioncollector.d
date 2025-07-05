@@ -27,6 +27,8 @@ public struct FunctionInfo
     string snippet;    /// raw function text
     string normalized; /// normalized body text
 
+    /// Stores the DMD AST node for this function, enabling further analysis
+    /// and tests.
     FuncDeclaration funcDecl;
 }
 
