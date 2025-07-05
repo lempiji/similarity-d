@@ -342,6 +342,21 @@ public Node normalizedAst(FunctionInfo f)
     return Node(NodeKind.Other, "root", children);
 }
 
+/// Recursively search `n` for a node with matching `value`. This helper is
+/// only used in unit tests so it is wrapped in `version(unittest)` to avoid
+/// being part of the public library. When adding test helpers in the future,
+/// prefer guarding them with `version(unittest)` as well.
+version(unittest)
+private bool containsNode(Node n, string value)
+{
+    if (n.value == value)
+        return true;
+    foreach (c; n.children)
+        if (containsNode(c, value))
+            return true;
+    return false;
+}
+
 /// Return the number of AST nodes in the normalized tree for `f`.
 public size_t nodeCount(FunctionInfo f)
 {
@@ -409,17 +424,7 @@ C foo(){
     assert(funcs.length >= 2);
     auto ast = normalizedAst(funcs[1]);
 
-    bool contains(Node n, string v)
-    {
-        if(n.value == v)
-            return true;
-        foreach(c; n.children)
-            if(contains(c, v))
-                return true;
-        return false;
-    }
-
-    assert(contains(ast, "assert"));
+    assert(containsNode(ast, "assert"));
 }
 
 /// Compute a similarity score between two functions using tree edit distance.
@@ -705,22 +710,12 @@ int foo(int x){
     assert(funcs.length == 1);
     auto ast = normalizedAst(funcs[0]);
 
-    bool contains(Node n, string v)
-    {
-        if(n.value == v)
-            return true;
-        foreach(c; n.children)
-            if(contains(c, v))
-                return true;
-        return false;
-    }
-
-    assert(contains(ast, "break"));
-    assert(contains(ast, "continue"));
-    assert(contains(ast, "goto"));
-    assert(contains(ast, "case"));
-    assert(contains(ast, "default"));
-    assert(contains(ast, "do"));
+    assert(containsNode(ast, "break"));
+    assert(containsNode(ast, "continue"));
+    assert(containsNode(ast, "goto"));
+    assert(containsNode(ast, "case"));
+    assert(containsNode(ast, "default"));
+    assert(containsNode(ast, "do"));
 }
 
 /// Renaming identifiers across parameters and locals yields full similarity
