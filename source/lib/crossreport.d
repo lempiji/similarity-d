@@ -274,3 +274,25 @@ int bar(){ return 2; }
     assert(matches.length == 1);
 }
 
+unittest
+{
+    import dmd.frontend : initDMD, deinitializeDMD;
+
+    initDMD();
+    scope(exit) deinitializeDMD();
+
+    string foo = "int foo(){ return 1; }";
+    string bar = "int bar(){ return 1; }";
+
+    auto funcs = collectFunctionsFromSource("foo.d", foo) ~
+                 collectFunctionsFromSource("bar.d", bar);
+
+    CrossMatch[] matches;
+    collectMatches(funcs, 0.0, 1, 1, false, true,
+        (CrossMatch m){ matches ~= m; });
+
+    assert(matches.length == 1);
+    assert(matches[0].snippetA == foo);
+    assert(matches[0].snippetB == bar);
+}
+
