@@ -1,3 +1,5 @@
+/// Converts AST statements into simplified nodes and measures similarity.
+/// Exposes `treeSimilarity` which leverages tree edit distance on normalized code.
 module treediff;
 
 import std.algorithm : min, max;

@@ -1,3 +1,5 @@
+/// Generates similarity reports between functions.
+/// Calculates pairwise matches using tree similarity and ranks the results.
 module crossreport;
 
 import std.algorithm : sort, max;
