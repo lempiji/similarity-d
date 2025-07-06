@@ -3,7 +3,7 @@
 Scripts in this directory must be cross‑platform and written in the D programming language. Use `rdmd` to run them so they work on both Windows and Linux.
 
 ```
-#!/usr/bin/env -S rdmd
+#!/usr/bin/env rdmd
 ```
 
 Typical invocation:
