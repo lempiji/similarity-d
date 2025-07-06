@@ -17,6 +17,7 @@ import dmd.func : FuncDeclaration;
 import dmd.globals : global;
 import dmd.lexer : Lexer;
 import dmd.tokens : TOK;
+import dmd.statement;
 
 version(unittest) import testutils : DmdInitGuard;
 
@@ -78,6 +79,174 @@ private string sliceLines(string code, uint startLine, uint endLine)
     return to!string(lines[startLine - 1 .. endLine].joiner("\n").array);
 }
 
+/// Traverse a statement tree and collect nested functions.
+private void collectNestedFromStmt(Statement s, string source,
+    ref FunctionInfo[] results, bool includeUnittests, bool excludeNested)
+{
+    if (s is null)
+        return;
+    if (auto ex = s.isExpStatement())
+    {
+        if (auto de = ex.exp.isDeclarationExp())
+        {
+            if (auto fd = de.declaration.isFuncDeclaration())
+                collectFrom(fd, source, results, includeUnittests, excludeNested);
+        }
+    }
+    if (auto cs = s.isCompoundStatement())
+    {
+        if (cs.statements)
+            foreach (st; *cs.statements)
+                collectNestedFromStmt(st, source, results,
+                    includeUnittests, excludeNested);
+        return;
+    }
+    if (auto sc = s.isScopeStatement())
+    {
+        collectNestedFromStmt(sc.statement, source, results,
+            includeUnittests, excludeNested);
+        return;
+    }
+    if (auto conds = s.isConditionalStatement())
+    {
+        collectNestedFromStmt(conds.ifbody, source, results,
+            includeUnittests, excludeNested);
+        collectNestedFromStmt(conds.elsebody, source, results,
+            includeUnittests, excludeNested);
+        return;
+    }
+    if (auto ifs = s.isIfStatement())
+    {
+        collectNestedFromStmt(ifs.ifbody, source, results,
+            includeUnittests, excludeNested);
+        collectNestedFromStmt(ifs.elsebody, source, results,
+            includeUnittests, excludeNested);
+        return;
+    }
+    if (auto ws = s.isWhileStatement())
+    {
+        collectNestedFromStmt(ws._body, source, results,
+            includeUnittests, excludeNested);
+        return;
+    }
+    if (auto fs = s.isForStatement())
+    {
+        collectNestedFromStmt(fs._init, source, results,
+            includeUnittests, excludeNested);
+        collectNestedFromStmt(fs._body, source, results,
+            includeUnittests, excludeNested);
+        return;
+    }
+    if (auto fes = s.isForeachStatement())
+    {
+        collectNestedFromStmt(fes._body, source, results,
+            includeUnittests, excludeNested);
+        return;
+    }
+    if (auto fr = s.isForeachRangeStatement())
+    {
+        collectNestedFromStmt(fr._body, source, results,
+            includeUnittests, excludeNested);
+        return;
+    }
+    if (auto sw = s.isSwitchStatement())
+    {
+        collectNestedFromStmt(sw._body, source, results,
+            includeUnittests, excludeNested);
+        return;
+    }
+    if (auto csw = s.isCaseStatement())
+    {
+        collectNestedFromStmt(csw.statement, source, results,
+            includeUnittests, excludeNested);
+        return;
+    }
+    if (auto cr = s.isCaseRangeStatement())
+    {
+        collectNestedFromStmt(cr.statement, source, results,
+            includeUnittests, excludeNested);
+        return;
+    }
+    if (auto def = s.isDefaultStatement())
+    {
+        collectNestedFromStmt(def.statement, source, results,
+            includeUnittests, excludeNested);
+        return;
+    }
+    if (auto sync = s.isSynchronizedStatement())
+    {
+        collectNestedFromStmt(sync._body, source, results,
+            includeUnittests, excludeNested);
+        return;
+    }
+    if (auto w = s.isWithStatement())
+    {
+        collectNestedFromStmt(w._body, source, results,
+            includeUnittests, excludeNested);
+        return;
+    }
+    if (auto tc = s.isTryCatchStatement())
+    {
+        collectNestedFromStmt(tc._body, source, results,
+            includeUnittests, excludeNested);
+        if (tc.catches)
+            foreach (c; *tc.catches)
+                collectNestedFromStmt(c.handler, source, results,
+                    includeUnittests, excludeNested);
+        return;
+    }
+    if (auto tf = s.isTryFinallyStatement())
+    {
+        collectNestedFromStmt(tf._body, source, results,
+            includeUnittests, excludeNested);
+        collectNestedFromStmt(tf.finalbody, source, results,
+            includeUnittests, excludeNested);
+        return;
+    }
+    if (auto dbg = s.isDebugStatement())
+    {
+        collectNestedFromStmt(dbg.statement, source, results,
+            includeUnittests, excludeNested);
+        return;
+    }
+    if (auto sg = s.isScopeGuardStatement())
+    {
+        collectNestedFromStmt(sg.statement, source, results,
+            includeUnittests, excludeNested);
+        return;
+    }
+    if (auto ur = s.isUnrolledLoopStatement())
+    {
+        if (ur.statements)
+            foreach (st; *ur.statements)
+                collectNestedFromStmt(st, source, results,
+                    includeUnittests, excludeNested);
+        return;
+    }
+    if (auto cd = s.isCompoundDeclarationStatement())
+    {
+        if (cd.statements)
+            foreach (st; *cd.statements)
+                collectNestedFromStmt(st, source, results,
+                    includeUnittests, excludeNested);
+        return;
+    }
+    if (auto ca = s.isCompoundAsmStatement())
+    {
+        if (ca.statements)
+            foreach (st; *ca.statements)
+                collectNestedFromStmt(st, source, results,
+                    includeUnittests, excludeNested);
+        return;
+    }
+    if (auto pr = s.isPragmaStatement())
+    {
+        collectNestedFromStmt(pr._body, source, results,
+            includeUnittests, excludeNested);
+        return;
+    }
+}
+
 /// Recursively traverse a symbol tree and collect all function declarations.
 ///
 /// Params:
@@ -86,7 +255,8 @@ private string sliceLines(string code, uint startLine, uint endLine)
 ///   results = array receiving discovered `FunctionInfo`
 ///   includeUnittests = whether to include `unittest` functions
 
-private void collectFrom(Dsymbol s, string source, ref FunctionInfo[] results, bool includeUnittests)
+private void collectFrom(Dsymbol s, string source, ref FunctionInfo[] results,
+    bool includeUnittests, bool excludeNested)
 {
     if (auto fd = s.isFuncDeclaration())
     {
@@ -100,54 +270,58 @@ private void collectFrom(Dsymbol s, string source, ref FunctionInfo[] results, b
             results ~= FunctionInfo(fd.loc.filename.to!string,
                 fd.loc.linnum, fd.endloc.linnum,
                 snippet, normalizeCode(snippet), fd);
+            if (!excludeNested)
+                collectNestedFromStmt(fd.fbody, source, results,
+                    includeUnittests, excludeNested);
         }
     }
     if (auto ad = s.isAttribDeclaration())
     {
         if (ad.decl)
             foreach (d; *ad.decl)
-                collectFrom(d, source, results, includeUnittests);
+                collectFrom(d, source, results, includeUnittests, excludeNested);
     }
     if (auto sd = s.isScopeDsymbol())
     {
         if (sd.members)
             foreach (d; *sd.members)
-                collectFrom(d, source, results, includeUnittests);
+                collectFrom(d, source, results, includeUnittests, excludeNested);
     }
 }
 
 /// Traverse the AST of `mod` and collect all functions.
-private FunctionInfo[] collectFunctions(Module mod, string code, bool includeUnittests)
+private FunctionInfo[] collectFunctions(Module mod, string code, bool includeUnittests, bool excludeNested)
 {
     FunctionInfo[] result;
     if (mod !is null && mod.members)
         foreach (s; *mod.members)
-            collectFrom(s, code, result, includeUnittests);
+            collectFrom(s, code, result, includeUnittests, excludeNested);
     return result;
 }
 
 /// Parse `code` and collect all functions it contains
-public FunctionInfo[] collectFunctionsFromSource(string filename, string code, bool includeUnittests = true)
+public FunctionInfo[] collectFunctionsFromSource(string filename, string code,
+    bool includeUnittests = true, bool excludeNested = false)
 {
     scope UnitTestFlagGuard guard = UnitTestFlagGuard(includeUnittests);
 
     auto t = parseModule(filename, code);
-    return collectFunctions(t.module_, code, includeUnittests);
+    return collectFunctions(t.module_, code, includeUnittests, excludeNested);
 }
 
 /// Parse a D source file and collect its functions
-public FunctionInfo[] collectFunctionsInFile(string path, bool includeUnittests = true)
+public FunctionInfo[] collectFunctionsInFile(string path, bool includeUnittests = true, bool excludeNested = false)
 {
     scope UnitTestFlagGuard guard = UnitTestFlagGuard(includeUnittests);
 
     auto t = parseModule(path);
     auto mod = t.module_;
     auto code = readText(path);
-    return collectFunctions(mod, code, includeUnittests);
+    return collectFunctions(mod, code, includeUnittests, excludeNested);
 }
 
 /// Collect functions from all `.d` files under `dir`
-public FunctionInfo[] collectFunctionsInDir(string dir, bool includeUnittests = true)
+public FunctionInfo[] collectFunctionsInDir(string dir, bool includeUnittests = true, bool excludeNested = false)
 {
     FunctionInfo[] results;
     scope UnitTestFlagGuard guard = UnitTestFlagGuard(includeUnittests);
@@ -155,7 +329,7 @@ public FunctionInfo[] collectFunctionsInDir(string dir, bool includeUnittests = 
     foreach (entry; dirEntries(dir, "*.d", SpanMode.depth))
     {
         if (entry.isFile)
-            results ~= collectFunctionsInFile(entry.name, includeUnittests);
+            results ~= collectFunctionsInFile(entry.name, includeUnittests, excludeNested);
     }
     return results;
 }
@@ -240,10 +414,14 @@ void outer()
 }
 };
     auto funcs = collectFunctionsFromSource("nested.d", code);
-    assert(funcs.length == 1);
+    assert(funcs.length == 2);
     auto expected = normalizeCode("void outer(){ int inner(){ return 1; } }");
     assert(funcs[0].normalized == expected);
     assert(funcs[0].startLine == 2 && funcs[0].endLine == 5);
+
+    auto withoutNested = collectFunctionsFromSource("nested.d", code, true, true);
+    assert(withoutNested.length == 1);
+    assert(withoutNested[0].funcDecl.ident.toString() == "outer");
 }
 
 unittest
@@ -318,10 +496,13 @@ void outerMost()
 }
 };
     auto funcs = collectFunctionsFromSource("nested2.d", code);
-    assert(funcs.length == 1);
+    assert(funcs.length == 3);
     auto expected = normalizeCode("void outerMost(){ void a(){} void b(){} }");
     assert(funcs[0].normalized == expected);
     assert(funcs[0].startLine == 2 && funcs[0].endLine == 6);
+
+    auto withoutNested = collectFunctionsFromSource("nested2.d", code, true, true);
+    assert(withoutNested.length == 1);
 }
 
 unittest
@@ -395,5 +576,167 @@ unittest
     assert(withoutUT.length == 2);
     foreach(f; withoutUT)
         assert(!f.funcDecl.isUnitTestDeclaration());
+}
+
+unittest
+{
+    scope DmdInitGuard guard = DmdInitGuard.make();
+
+    string code = q{
+void outer()
+{
+    if(true)
+    {
+        int inIf(){ return 1; }
+    }
+    foreach(i; 0 .. 1)
+    {
+        int inForeach(){ return i; }
+    }
+}
+};
+
+    auto t = parseModule("whitebox.d", code);
+    auto outer = (*t.module_.members)[0].isFuncDeclaration();
+    FunctionInfo[] nested;
+    collectNestedFromStmt(outer.fbody, code, nested, true, false);
+    assert(nested.length == 2);
+    import std.algorithm.searching : canFind;
+    import std.conv : to;
+    string[] names;
+    foreach(n; nested)
+        names ~= to!string(n.funcDecl.ident.toString());
+    assert(names.canFind("inIf"));
+    assert(names.canFind("inForeach"));
+    foreach(n; nested)
+        if(n.funcDecl.ident.toString() == "inIf")
+            assert(n.normalized == normalizeCode("int inIf(){ return 1; }"));
+}
+
+unittest
+{
+    scope DmdInitGuard guard = DmdInitGuard.make();
+
+    string code = q{
+void outerAll(int x)
+{
+    version(unittest)
+    {
+        int inVersion(){ return 0; }
+    }
+    else
+    {
+        int inVersionElse(){ return 0; }
+    }
+    while(x > 0)
+    {
+        int inWhile(){ return x; }
+        --x;
+    }
+    for(int i=0; i<1; ++i)
+    {
+        int inFor(){ return i; }
+    }
+    foreach(i; 0..1)
+    {
+        int inForeach(){ return i; }
+    }
+    foreach(i; 0 .. 1)
+    {
+        int inForeachRange(){ return i; }
+    }
+    switch(x)
+    {
+        case 0:
+            int inCase(){ return 0; }
+            break;
+        case 1: .. case 2:
+            int inCaseRange(){ return 0; }
+            break;
+        default:
+            int inDefault(){ return 0; }
+    }
+    synchronized
+    {
+        int inSync(){ return 0; }
+    }
+    with(new Object())
+    {
+        int inWith(){ return 0; }
+    }
+    try
+    {
+        int inTry(){ return 0; }
+    }
+    catch(Exception e)
+    {
+        int inCatch(){ return 0; }
+    }
+    try
+    {
+        int inTryFinally(){ return 0; }
+    }
+    finally
+    {
+        int inFinally(){ return 0; }
+    }
+    debug
+    {
+        int inDebug(){ return 0; }
+    }
+    scope(exit)
+    {
+        void inScope(){ }
+    }
+    int a, b;
+    asm { nop; }
+    pragma(inline, false)
+    {
+        int inPragma(){ return 0; }
+    }
+}
+};
+
+    auto t = parseModule("whitebox2.d", code);
+    auto outer = (*t.module_.members)[0].isFuncDeclaration();
+    FunctionInfo[] nested;
+    collectNestedFromStmt(outer.fbody, code, nested, true, false);
+    import std.algorithm.searching : canFind;
+    import std.conv : to;
+    string[] names;
+    foreach(n; nested)
+        names ~= to!string(n.funcDecl.ident.toString());
+    assert(names.canFind("inVersion"));
+    assert(names.canFind("inVersionElse"));
+    assert(names.canFind("inWhile"));
+    assert(names.canFind("inFor"));
+    assert(names.canFind("inForeach"));
+    assert(names.canFind("inForeachRange"));
+    assert(names.canFind("inCase"));
+    assert(names.canFind("inCaseRange"));
+    assert(names.canFind("inDefault"));
+    assert(names.canFind("inSync"));
+    assert(names.canFind("inWith"));
+    assert(names.canFind("inTry"));
+    assert(names.canFind("inCatch"));
+    assert(names.canFind("inTryFinally"));
+    assert(names.canFind("inFinally"));
+    assert(names.canFind("inDebug"));
+    assert(names.canFind("inScope"));
+    assert(names.canFind("inPragma"));
+}
+
+unittest
+{
+    scope DmdInitGuard guard = DmdInitGuard.make();
+
+    string code = q{
+deprecated {
+    int attrFunc(){ return 1; }
+}
+};
+    auto funcs = collectFunctionsFromSource("attr.d", code);
+    assert(funcs.length == 1);
+    assert(funcs[0].funcDecl.ident.toString() == "attrFunc");
 }
 
