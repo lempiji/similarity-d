@@ -17,6 +17,7 @@ version(unittest)
     __gshared bool lastCrossFile;
     __gshared bool lastNoSizePenalty;
     __gshared bool lastPrintResult;
+    __gshared bool lastHelpWanted;
     FunctionInfo[] collectFunctionsInDir(string dir, bool includeUnittests = true)
     {
         lastIncludeUnittests = includeUnittests;
@@ -60,6 +61,7 @@ void main(string[] args)
         lastCrossFile = crossFile;
         lastNoSizePenalty = noSizePenalty;
         lastPrintResult = printResult;
+        lastHelpWanted = helpInfo.helpWanted;
     }
 
     if (helpInfo.helpWanted)
@@ -96,6 +98,8 @@ void main(string[] args)
 unittest
 {
     auto dir = ".";
+    main(["app", "--help"]);
+    assert(lastHelpWanted == true);
     lastIncludeUnittests = true;
     main(["app", "--dir", dir]);
     assert(lastIncludeUnittests == true);
