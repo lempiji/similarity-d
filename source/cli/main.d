@@ -19,6 +19,7 @@ version(unittest)
     __gshared bool lastPrintResult;
     __gshared bool lastExcludeNested;
     FunctionInfo[] collectFunctionsInDir(string dir, bool includeUnittests = true, bool excludeNested = false)
+    __gshared bool lastHelpWanted;
     {
         lastIncludeUnittests = includeUnittests;
         lastExcludeNested = excludeNested;
@@ -65,6 +66,7 @@ void main(string[] args)
         lastNoSizePenalty = noSizePenalty;
         lastPrintResult = printResult;
         lastExcludeNested = excludeNested;
+        lastHelpWanted = helpInfo.helpWanted;
     }
 
     if (helpInfo.helpWanted)
@@ -101,6 +103,8 @@ void main(string[] args)
 unittest
 {
     auto dir = ".";
+    main(["app", "--help"]);
+    assert(lastHelpWanted == true);
     lastIncludeUnittests = true;
     lastExcludeNested = false;
     main(["app", "--dir", dir]);

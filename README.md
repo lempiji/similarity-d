@@ -66,6 +66,13 @@ samples/basic\file_a.d:3-9 <-> samples/basic\file_b.d:3-9 score=1 priority=7
 samples/basic\file_a.d:20-26 <-> samples/basic\file_b.d:20-26 score=1 priority=7
 ```
 
+Cross-file comparison is enabled by default, so functions from `file_a.d` and `file_b.d` match. Restrict the tool to compare only within each file:
+
+```bash
+$ dub run -- --dir samples/basic --min-tokens=0 --cross-file=false
+No similar functions found.
+```
+
 Running without `--min-tokens=0` prints nothing because the default value of 20
 filters out these tiny functions.
 
