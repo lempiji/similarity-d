@@ -9,7 +9,7 @@ import std.conv : to;
 import std.array : array;
 import std.algorithm : joiner;
 
-import dmd.frontend : parseModule, initDMD, deinitializeDMD;
+import dmd.frontend : parseModule;
 import dmd.dmodule : Module;
 import dmd.dsymbol : Dsymbol, ScopeDsymbol;
 import dmd.attrib : AttribDeclaration;
@@ -17,6 +17,8 @@ import dmd.func : FuncDeclaration;
 import dmd.globals : global;
 import dmd.lexer : Lexer;
 import dmd.tokens : TOK;
+
+version(unittest) import testutils : DmdInitGuard;
 
 /// Metadata describing a function found in a source file.
 public struct FunctionInfo
@@ -158,8 +160,7 @@ public FunctionInfo[] collectFunctionsInDir(string dir, bool includeUnittests = 
 
 unittest
 {
-    initDMD();
-    scope(exit) deinitializeDMD();
+    scope DmdInitGuard guard = DmdInitGuard.make();
 
     string code = q{
 int foo() { // comment
@@ -177,8 +178,7 @@ int bar(int x)
 
 unittest
 {
-    initDMD();
-    scope(exit) deinitializeDMD();
+    scope DmdInitGuard guard = DmdInitGuard.make();
 
     string code = q{
 struct S
@@ -195,8 +195,7 @@ struct S
 
 unittest
 {
-    initDMD();
-    scope(exit) deinitializeDMD();
+    scope DmdInitGuard guard = DmdInitGuard.make();
 
     string code = q{
 class C
@@ -213,8 +212,7 @@ class C
 
 unittest
 {
-    initDMD();
-    scope(exit) deinitializeDMD();
+    scope DmdInitGuard guard = DmdInitGuard.make();
 
     string code = q{
 mixin template Temp()
@@ -231,8 +229,7 @@ mixin template Temp()
 
 unittest
 {
-    initDMD();
-    scope(exit) deinitializeDMD();
+    scope DmdInitGuard guard = DmdInitGuard.make();
 
     string code = q{
 void outer()
@@ -249,8 +246,7 @@ void outer()
 
 unittest
 {
-    initDMD();
-    scope(exit) deinitializeDMD();
+    scope DmdInitGuard guard = DmdInitGuard.make();
 
     string code = q{
 struct Multi
@@ -269,8 +265,7 @@ struct Multi
 
 unittest
 {
-    initDMD();
-    scope(exit) deinitializeDMD();
+    scope DmdInitGuard guard = DmdInitGuard.make();
 
     string code = q{
 struct Gen(T)
@@ -287,8 +282,7 @@ struct Gen(T)
 
 unittest
 {
-    initDMD();
-    scope(exit) deinitializeDMD();
+    scope DmdInitGuard guard = DmdInitGuard.make();
 
     string code = q{
 class Many
@@ -312,8 +306,7 @@ class Many
 
 unittest
 {
-    initDMD();
-    scope(exit) deinitializeDMD();
+    scope DmdInitGuard guard = DmdInitGuard.make();
 
     string code = q{
 void outerMost()
@@ -331,8 +324,7 @@ void outerMost()
 
 unittest
 {
-    initDMD();
-    scope(exit) deinitializeDMD();
+    scope DmdInitGuard guard = DmdInitGuard.make();
 
     string code = q{
 int foo(){ return 1; }
@@ -345,8 +337,7 @@ unittest { assert(foo()); }
 
 unittest
 {
-    initDMD();
-    scope(exit) deinitializeDMD();
+    scope DmdInitGuard guard = DmdInitGuard.make();
 
     string code = q{
 int foo(){ return 1; }
@@ -370,7 +361,6 @@ unittest
 
 unittest
 {
-    import dmd.frontend : initDMD, deinitializeDMD;
     import std.file : tempDir, mkdir, rmdirRecurse, write;
     import std.path : buildPath;
     import std.datetime.systime : Clock;
@@ -383,9 +373,11 @@ unittest
     write(buildPath(dir, "a.d"), "int foo(){ return 1; }");
     write(buildPath(dir, "b.d"), "int bar(){ return 2; }\nunittest { assert(bar() == 2); }");
 
-    initDMD();
-    auto withUT = collectFunctionsInDir(dir);
-    deinitializeDMD();
+    FunctionInfo[] withUT;
+    {
+        scope DmdInitGuard guard = DmdInitGuard.make();
+        withUT = collectFunctionsInDir(dir);
+    }
     assert(withUT.length == 3);
     size_t utCount;
     foreach(f; withUT)
@@ -393,9 +385,11 @@ unittest
             ++utCount;
     assert(utCount == 1);
 
-    initDMD();
-    auto withoutUT = collectFunctionsInDir(dir, false);
-    deinitializeDMD();
+    FunctionInfo[] withoutUT;
+    {
+        scope DmdInitGuard guard = DmdInitGuard.make();
+        withoutUT = collectFunctionsInDir(dir, false);
+    }
     assert(withoutUT.length == 2);
     foreach(f; withoutUT)
         assert(!f.funcDecl.isUnitTestDeclaration());

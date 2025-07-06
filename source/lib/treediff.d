@@ -6,6 +6,8 @@ import std.algorithm : min, max;
 import functioncollector : FunctionInfo, collectFunctionsFromSource;
 import treedistance : Node, NodeKind, ted, treeSize;
 
+version(unittest) import testutils : DmdInitGuard;
+
 import dmd.frontend : parseModule;
 import dmd.statement : Statement, CompoundStatement, IfStatement, WhileStatement,
     ForStatement, ForeachStatement, ForeachRangeStatement, ReturnStatement,
@@ -366,11 +368,9 @@ public size_t nodeCount(FunctionInfo f)
 
 unittest
 {
-    import dmd.frontend : initDMD, deinitializeDMD;
     import std.math : isClose;
 
-    initDMD();
-    scope(exit) deinitializeDMD();
+    scope DmdInitGuard guard = DmdInitGuard.make();
 
     string code = q{
 int foo(){ return 1; }
@@ -389,10 +389,8 @@ int foo(){ return 1; }
 
 unittest
 {
-    import dmd.frontend : initDMD, deinitializeDMD;
 
-    initDMD();
-    scope(exit) deinitializeDMD();
+    scope DmdInitGuard guard = DmdInitGuard.make();
 
     string code = q{
 int foo(){ return 1; }
@@ -406,10 +404,8 @@ int foo(){ return 1; }
 /// ensure exprToNode covers additional expression forms
 unittest
 {
-    import dmd.frontend : initDMD, deinitializeDMD;
 
-    initDMD();
-    scope(exit) deinitializeDMD();
+    scope DmdInitGuard guard = DmdInitGuard.make();
 
     string code = q{
 class C{ int x; this(int n){ this.x = n; } }
@@ -456,11 +452,9 @@ public double treeSimilarity(FunctionInfo a, FunctionInfo b, bool sizePenalty=tr
 
 unittest
 {
-    import dmd.frontend : initDMD, deinitializeDMD;
     import std.math : isClose;
 
-    initDMD();
-    scope(exit) deinitializeDMD();
+    scope DmdInitGuard guard = DmdInitGuard.make();
 
     string code = q{
 int foo(int x){ return x + 1; }
@@ -484,11 +478,9 @@ int b(){ return 0 + 1; }
 /// Variable renaming should not affect similarity
 unittest
 {
-    import dmd.frontend : initDMD, deinitializeDMD;
     import std.math : isClose;
 
-    initDMD();
-    scope(exit) deinitializeDMD();
+    scope DmdInitGuard guard = DmdInitGuard.make();
 
     string code = q{
 int foo(){ int a = 1; return a; }
@@ -505,11 +497,9 @@ int bar(){ int b = 1; return b; }
 /// Binary operator change should keep similarity high
 unittest
 {
-    import dmd.frontend : initDMD, deinitializeDMD;
     import std.math : isClose;
 
-    initDMD();
-    scope(exit) deinitializeDMD();
+    scope DmdInitGuard guard = DmdInitGuard.make();
 
     string code = q{
 int foo(int x){ return x + 1; }
@@ -525,11 +515,9 @@ int bar(int x){ return x - 1; }
 /// Literal differences should have minimal impact
 unittest
 {
-    import dmd.frontend : initDMD, deinitializeDMD;
     import std.math : isClose;
 
-    initDMD();
-    scope(exit) deinitializeDMD();
+    scope DmdInitGuard guard = DmdInitGuard.make();
 
     string code = q{
 int foo(){ return 1; }
@@ -546,10 +534,8 @@ int bar(){ return 2; }
 /// Additional if statement near the root should keep high similarity
 unittest
 {
-    import dmd.frontend : initDMD, deinitializeDMD;
 
-    initDMD();
-    scope(exit) deinitializeDMD();
+    scope DmdInitGuard guard = DmdInitGuard.make();
 
     string code = q{
 int foo(int x){
@@ -570,10 +556,8 @@ int bar(int x){
 /// Wrapping body in try-catch should not drastically lower similarity
 unittest
 {
-    import dmd.frontend : initDMD, deinitializeDMD;
 
-    initDMD();
-    scope(exit) deinitializeDMD();
+    scope DmdInitGuard guard = DmdInitGuard.make();
 
     string code = q{
 int foo(){ return 1; }
@@ -589,11 +573,9 @@ int bar(){ try{ return 1; }catch(Exception e){ return 0; } }
 /// Leaf level expression change should keep similarity high
 unittest
 {
-    import dmd.frontend : initDMD, deinitializeDMD;
     import std.math : isClose;
 
-    initDMD();
-    scope(exit) deinitializeDMD();
+    scope DmdInitGuard guard = DmdInitGuard.make();
 
     string code = q{
 int foo(int x){ return x + 1; }
@@ -610,10 +592,8 @@ int bar(int x){ return x + 2; }
 /// for and foreach loops should be considered similar
 unittest
 {
-    import dmd.frontend : initDMD, deinitializeDMD;
 
-    initDMD();
-    scope(exit) deinitializeDMD();
+    scope DmdInitGuard guard = DmdInitGuard.make();
 
     string code = q{
 int foo(int[] a){ int s=0; for(int i=0;i<a.length;i++) s+=a[i]; return s; }
@@ -629,10 +609,8 @@ int bar(int[] a){ int s=0; foreach(i; a) s+=i; return s; }
 /// for and while loops also share structure
 unittest
 {
-    import dmd.frontend : initDMD, deinitializeDMD;
 
-    initDMD();
-    scope(exit) deinitializeDMD();
+    scope DmdInitGuard guard = DmdInitGuard.make();
 
     string code = q{
 int foo(int n){ int i=0; for(; i<n; ++i){} return i; }
@@ -648,10 +626,8 @@ int bar(int n){ int i=0; while(i<n) ++i; return i; }
 /// Nested if differences
 unittest
 {
-    import dmd.frontend : initDMD, deinitializeDMD;
 
-    initDMD();
-    scope(exit) deinitializeDMD();
+    scope DmdInitGuard guard = DmdInitGuard.make();
 
     string code = q{
 int foo(int x){ if(x>0){ if(x>1) return x;} return -x; }
@@ -667,10 +643,8 @@ int bar(int x){ if(x>0) return x; return -x; }
 /// Completely different functions should score low
 unittest
 {
-    import dmd.frontend : initDMD, deinitializeDMD;
 
-    initDMD();
-    scope(exit) deinitializeDMD();
+    scope DmdInitGuard guard = DmdInitGuard.make();
 
     string code = q{
 int foo(){ return 1; }
@@ -686,10 +660,8 @@ void bar(string s){ import std.stdio; writeln(s); }
 /// stmtToNode should recognize various statement forms
 unittest
 {
-    import dmd.frontend : initDMD, deinitializeDMD;
 
-    initDMD();
-    scope(exit) deinitializeDMD();
+    scope DmdInitGuard guard = DmdInitGuard.make();
 
     string code = q{
 int foo(int x){
@@ -721,11 +693,9 @@ int foo(int x){
 /// Renaming identifiers across parameters and locals yields full similarity
 unittest
 {
-    import dmd.frontend : initDMD, deinitializeDMD;
     import std.math : isClose;
 
-    initDMD();
-    scope(exit) deinitializeDMD();
+    scope DmdInitGuard guard = DmdInitGuard.make();
 
     string code = q{
 int foo(int a){ int x = a * 2; return x; }
@@ -741,11 +711,9 @@ int bar(int b){ int y = b * 2; return y; }
 /// Changing literal values should not lower similarity
 unittest
 {
-    import dmd.frontend : initDMD, deinitializeDMD;
     import std.math : isClose;
 
-    initDMD();
-    scope(exit) deinitializeDMD();
+    scope DmdInitGuard guard = DmdInitGuard.make();
 
     string code = q{
 int foo(){ return 42; }
@@ -761,10 +729,8 @@ int bar(){ return 1337; }
 /// Variations in loop form still yield high similarity
 unittest
 {
-    import dmd.frontend : initDMD, deinitializeDMD;
 
-    initDMD();
-    scope(exit) deinitializeDMD();
+    scope DmdInitGuard guard = DmdInitGuard.make();
 
     string code = q{
 int foo(int n){ int i=0; do{ ++i; } while(i<n); return i; }
@@ -780,11 +746,9 @@ int bar(int n){ int i=0; while(i<n){ ++i; } return i; }
 
 unittest
 {
-    import dmd.frontend : initDMD, deinitializeDMD;
     import std.math : isClose;
 
-    initDMD();
-    scope(exit) deinitializeDMD();
+    scope DmdInitGuard guard = DmdInitGuard.make();
 
     string code = q{
 int a(){ return 0; }
