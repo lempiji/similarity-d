@@ -741,3 +741,42 @@ deprecated {
     assert(funcs[0].funcDecl.ident.toString() == "attrFunc");
 }
 
+unittest
+{
+    import std.file : tempDir, mkdir, rmdirRecurse, write;
+    import std.path : buildPath;
+    import std.datetime.systime : Clock;
+    import std.conv : to;
+    import std.algorithm.searching : canFind;
+
+    auto dir = buildPath(tempDir(), "fcnested-" ~ to!string(Clock.currTime().toUnixTime()));
+    mkdir(dir);
+    scope(exit) rmdirRecurse(dir);
+
+    write(buildPath(dir, "a.d"), q{
+void outer1()
+{
+    int inner1(){ return 1; }
+}
+});
+    write(buildPath(dir, "b.d"), q{
+void outer2()
+{
+    void inner2(){}
+}
+});
+
+    FunctionInfo[] funcs;
+    {
+        scope DmdInitGuard guard = DmdInitGuard.make();
+        funcs = collectFunctionsInDir(dir, true, true);
+    }
+
+    assert(funcs.length == 2);
+    string[] names;
+    foreach(f; funcs)
+        names ~= to!string(f.funcDecl.ident.toString());
+    assert(names.canFind("outer1"));
+    assert(names.canFind("outer2"));
+}
+
