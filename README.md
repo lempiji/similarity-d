@@ -107,7 +107,7 @@ After running the tests, run the coverage check script to ensure each
 `source-*.lst` file reports at least 70% coverage:
 
 ```bash
-./scripts/check-coverage.sh
+./scripts/check_coverage.d
 ```
 The script exits with an error if any coverage file is below the threshold.
 
