@@ -7,6 +7,8 @@ import std.range : isOutputRange, put;
 import functioncollector : FunctionInfo, collectFunctionsFromSource;
 import treediff : treeSimilarity, nodeCount;
 
+version(unittest) import testutils : DmdInitGuard;
+
 /**
  * Detailed information about a detected match between two functions.
  *
@@ -113,9 +115,7 @@ void collectMatches(Sink)(FunctionInfo[] funcs, double threshold, size_t minLine
 
 unittest
 {
-    import dmd.frontend : initDMD, deinitializeDMD;
-    initDMD();
-    scope(exit) deinitializeDMD();
+    scope DmdInitGuard guard = DmdInitGuard.make();
 
     string codeA = q{
 int foo(){ return 1; }
@@ -142,9 +142,7 @@ int bar(){ return 1; }
 
 unittest
 {
-    import dmd.frontend : initDMD, deinitializeDMD;
-    initDMD();
-    scope(exit) deinitializeDMD();
+    scope DmdInitGuard guard = DmdInitGuard.make();
 
     string code = q{
 int a(){ return 0; }
@@ -161,10 +159,8 @@ int c(){ return 0; }
 
 unittest
 {
-    import dmd.frontend : initDMD, deinitializeDMD;
     import std.conv : to;
-    initDMD();
-    scope(exit) deinitializeDMD();
+    scope DmdInitGuard guard = DmdInitGuard.make();
 
     enum count = 150;
     string code;
@@ -179,9 +175,7 @@ unittest
 
 unittest
 {
-    import dmd.frontend : initDMD, deinitializeDMD;
-    initDMD();
-    scope(exit) deinitializeDMD();
+    scope DmdInitGuard guard = DmdInitGuard.make();
 
     string code = q{
 int foo(){
@@ -209,9 +203,7 @@ int bar(){
 
 unittest
 {
-    import dmd.frontend : initDMD, deinitializeDMD;
-    initDMD();
-    scope(exit) deinitializeDMD();
+    scope DmdInitGuard guard = DmdInitGuard.make();
 
     string code = q{
 int foo(){
@@ -244,10 +236,8 @@ int bar(){
 
 unittest
 {
-    import dmd.frontend : initDMD, deinitializeDMD;
 
-    initDMD();
-    scope(exit) deinitializeDMD();
+    scope DmdInitGuard guard = DmdInitGuard.make();
 
     string code = q{
 int foo(){ return 1; }
@@ -276,10 +266,8 @@ int bar(){ return 2; }
 
 unittest
 {
-    import dmd.frontend : initDMD, deinitializeDMD;
 
-    initDMD();
-    scope(exit) deinitializeDMD();
+    scope DmdInitGuard guard = DmdInitGuard.make();
 
     string foo = "int foo(){ return 1; }";
     string bar = "int bar(){ return 1; }";
