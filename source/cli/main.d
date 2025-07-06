@@ -6,6 +6,9 @@ module cli.main;
 import std.stdio : writeln;
 import std.getopt : getopt, defaultGetoptPrinter, GetoptResult;
 import std.file : exists, isDir;
+import std.json : parseJSON;
+
+enum packageVersion = parseJSON(import("dub.json"))["version"].str;
 
 version(unittest)
 {
@@ -20,6 +23,9 @@ version(unittest)
     __gshared bool lastPrintResult;
     __gshared bool lastExcludeNested;
     __gshared bool lastHelpWanted;
+    __gshared bool lastShowVersion;
+    __gshared string lastVersionPrinted;
+    void printVersion(string s) { lastVersionPrinted = s; }
     FunctionInfo[] collectFunctionsInDir(string dir, bool includeUnittests = true, bool excludeNested = false)
     {
         lastIncludeUnittests = includeUnittests;
@@ -30,6 +36,7 @@ version(unittest)
 else
 {
     import functioncollector : collectFunctionsInDir;
+    void printVersion(string s) { writeln(s); }
 }
 import crossreport : collectMatches, CrossMatch;
 import dmd.frontend : initDMD, deinitializeDMD;
@@ -44,6 +51,7 @@ int main(string[] args)
     bool crossFile = true;
     bool excludeUnittests = false;
     bool excludeNested = false;
+    bool showVersion = false;
     string dir = ".";
 
     GetoptResult helpInfo = getopt(args,
@@ -55,7 +63,8 @@ int main(string[] args)
         "min-tokens", &minTokens,
         "dir", &dir,
         "exclude-unittests", &excludeUnittests,
-        "exclude-nested", &excludeNested
+        "exclude-nested", &excludeNested,
+        "version", &showVersion
     );
 
     version(unittest)
@@ -68,11 +77,18 @@ int main(string[] args)
         lastPrintResult = printResult;
         lastExcludeNested = excludeNested;
         lastHelpWanted = helpInfo.helpWanted;
+        lastShowVersion = showVersion;
     }
 
     if (helpInfo.helpWanted)
     {
         defaultGetoptPrinter("similarity-d [options]", helpInfo.options);
+        return 0;
+    }
+
+    if (showVersion)
+    {
+        printVersion(packageVersion);
         return 0;
     }
 
@@ -113,11 +129,15 @@ unittest
     auto dir = ".";
     assert(main(["app", "--help"]) == 0);
     assert(lastHelpWanted == true);
+    assert(main(["app", "--version"]) == 0);
+    assert(lastShowVersion == true);
+    assert(lastVersionPrinted == packageVersion);
     lastIncludeUnittests = true;
     lastExcludeNested = false;
     assert(main(["app", "--dir", dir]) == 0);
     assert(lastIncludeUnittests == true);
     assert(lastExcludeNested == false);
+    assert(lastShowVersion == false);
     assert(lastThreshold == 0.85);
     assert(lastMinLines == 5);
     assert(lastMinTokens == 20);
@@ -136,6 +156,7 @@ unittest
     assert(lastCrossFile == false);
     assert(lastNoSizePenalty == true);
     assert(lastPrintResult == true);
+    assert(lastShowVersion == false);
 }
 
 unittest
@@ -144,10 +165,12 @@ unittest
     lastExcludeNested = false;
     assert(main(["app", "--dir", dir, "--exclude-nested"]) == 0);
     assert(lastExcludeNested == true);
+    assert(lastShowVersion == false);
 }
 
 unittest
 {
     auto bogus = "./does-not-exist";
     assert(main(["app", "--dir", bogus]) == 1);
+    assert(lastShowVersion == false);
 }
