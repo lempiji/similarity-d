@@ -44,7 +44,11 @@ $ similarity-d --threshold=0.8 --cross-file=false
 
 ## Remarks
 
-https://github.com/mizchi/similarity
+This project adapts the ideas from
+[mizchi/similarity](https://github.com/mizchi/similarity), a multi-language
+code duplication detector written in Rust and TypeScript. While the original
+repository focuses on various languages, **similarity-d** implements the same
+tree edit distance approach specifically for D source code.
 
 ## Sample Usage
 
