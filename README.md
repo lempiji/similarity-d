@@ -101,3 +101,7 @@ configuration:
 dub run -- --dir source/lib --exclude-unittests --threshold=0.9 --min-lines=3
 ```
 
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for workflow and guidelines.
