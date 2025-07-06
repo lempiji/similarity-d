@@ -27,6 +27,7 @@ dub run similarity-d -- [options]
 - `--print`  Print the snippet of each function when reporting results.
 - `--cross-file`[=true|false]  Allow comparison across different files (default `true`). Use `--cross-file=false` to limit comparisons within each file.
 - `--exclude-unittests`  Skip `unittest` blocks when collecting functions.
+- `--exclude-nested`  Ignore nested functions and only collect top-level declarations.
 
 The CLI compares all functions it finds in the specified directory and prints any matches whose similarity score exceeds the threshold.
 Each result lists the two locations and the calculated similarity.
@@ -37,7 +38,7 @@ When computing similarity a length penalty is applied so that short functions do
 Example:
 
 ```bash
-$ similarity-d --threshold=0.8 --min-lines=3 --dir=source
+$ similarity-d --threshold=0.8 --min-lines=3 --dir=source --exclude-nested
 # disable cross-file comparisons
 $ similarity-d --threshold=0.8 --cross-file=false
 ```
