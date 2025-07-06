@@ -105,6 +105,8 @@ dub test --coverage --coverage-ctfe
 
 After running tests, inspect the `source-*.lst` files and confirm the final two
 lines show coverage of at least 70%.
+You can automate this check by running `scripts/check-coverage.sh` which will
+exit with an error if any coverage file is below the threshold.
 
 To verify the command line interface still works, invoke it with a minimal
 configuration:
