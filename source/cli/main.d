@@ -17,9 +17,11 @@ version(unittest)
     __gshared bool lastCrossFile;
     __gshared bool lastNoSizePenalty;
     __gshared bool lastPrintResult;
-    FunctionInfo[] collectFunctionsInDir(string dir, bool includeUnittests = true)
+    __gshared bool lastExcludeNested;
+    FunctionInfo[] collectFunctionsInDir(string dir, bool includeUnittests = true, bool excludeNested = false)
     {
         lastIncludeUnittests = includeUnittests;
+        lastExcludeNested = excludeNested;
         return [];
     }
 }
@@ -39,6 +41,7 @@ void main(string[] args)
     bool printResult = false;
     bool crossFile = true;
     bool excludeUnittests = false;
+    bool excludeNested = false;
     string dir = ".";
 
     GetoptResult helpInfo = getopt(args,
@@ -49,7 +52,8 @@ void main(string[] args)
         "cross-file", &crossFile,
         "min-tokens", &minTokens,
         "dir", &dir,
-        "exclude-unittests", &excludeUnittests
+        "exclude-unittests", &excludeUnittests,
+        "exclude-nested", &excludeNested
     );
 
     version(unittest)
@@ -60,6 +64,7 @@ void main(string[] args)
         lastCrossFile = crossFile;
         lastNoSizePenalty = noSizePenalty;
         lastPrintResult = printResult;
+        lastExcludeNested = excludeNested;
     }
 
     if (helpInfo.helpWanted)
@@ -71,7 +76,7 @@ void main(string[] args)
     initDMD();
     scope(exit) deinitializeDMD();
 
-    auto funcs = collectFunctionsInDir(dir, !excludeUnittests);
+    auto funcs = collectFunctionsInDir(dir, !excludeUnittests, excludeNested);
     bool found = false;
     collectMatches(funcs, threshold, minLines, minTokens,
             noSizePenalty, crossFile, (CrossMatch m)
@@ -97,8 +102,10 @@ unittest
 {
     auto dir = ".";
     lastIncludeUnittests = true;
+    lastExcludeNested = false;
     main(["app", "--dir", dir]);
     assert(lastIncludeUnittests == true);
+    assert(lastExcludeNested == false);
     assert(lastThreshold == 0.85);
     assert(lastMinLines == 5);
     assert(lastMinTokens == 20);
@@ -108,12 +115,21 @@ unittest
 
     main(["app", "--dir", dir, "--exclude-unittests",
         "--threshold=0.9", "--min-lines=2", "--min-tokens=10",
-        "--cross-file=false", "--no-size-penalty", "--print"]);
+        "--cross-file=false", "--no-size-penalty", "--print", "--exclude-nested"]);
     assert(lastIncludeUnittests == false);
+    assert(lastExcludeNested == true);
     assert(lastThreshold == 0.9);
     assert(lastMinLines == 2);
     assert(lastMinTokens == 10);
     assert(lastCrossFile == false);
     assert(lastNoSizePenalty == true);
     assert(lastPrintResult == true);
+}
+
+unittest
+{
+    auto dir = ".";
+    lastExcludeNested = false;
+    main(["app", "--dir", dir, "--exclude-nested"]);
+    assert(lastExcludeNested == true);
 }
