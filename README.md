@@ -94,6 +94,23 @@ $ dub run -- --dir samples/threshold --threshold=0.3 --min-tokens=0 --cross-file
 samples/threshold\a.d:1-7 <-> samples/threshold\a.d:9-17 score=0.346939 priority=3.12245
 ```
 
+### `samples/nested`
+
+This folder illustrates how nested functions influence the results. The files
+contain identical nested `addOne` functions but different outer functions.
+
+```bash
+$ dub run -- --dir samples/nested --min-tokens=0
+samples/nested\file_a.d:3-9 <-> samples/nested\file_b.d:3-9 score=1 priority=7
+```
+
+Ignoring nested functions removes the match:
+
+```bash
+$ dub run -- --dir samples/nested --min-tokens=0 --exclude-nested
+No similar functions found.
+```
+
 ## Development
 
 Run the full test suite before sending a pull request.  The project expects
