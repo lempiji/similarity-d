@@ -39,6 +39,7 @@ public struct FunctionInfo
 /// the instance.
 private struct UnitTestFlagGuard
 {
+    @disable this(this);
     this(bool enabled)
     {
         _prev = global.params.useUnitTests;
