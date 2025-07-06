@@ -27,6 +27,7 @@ dub run similarity-d -- [options]
 - `--print`  Print the snippet of each function when reporting results.
 - `--cross-file`[=true|false]  Allow comparison across different files (default `true`). Use `--cross-file=false` to limit comparisons within each file.
 - `--exclude-unittests`  Skip `unittest` blocks when collecting functions.
+- `--exclude-nested`  Ignore nested functions so only top level routines are compared.
 
 The CLI compares all functions it finds in the specified directory and prints any matches whose similarity score exceeds the threshold.
 Each result lists the two locations and the calculated similarity.
