@@ -414,13 +414,13 @@ void outer()
     int inner(){ return 1; }
 }
 };
-    auto funcs = collectFunctionsFromSource("nested.d", code);
+    auto funcs = collectFunctionsFromSource("nested01.d", code);
     assert(funcs.length == 2);
     auto expected = normalizeCode("void outer(){ int inner(){ return 1; } }");
     assert(funcs[0].normalized == expected);
     assert(funcs[0].startLine == 2 && funcs[0].endLine == 5);
 
-    auto withoutNested = collectFunctionsFromSource("nested.d", code, true, true);
+    auto withoutNested = collectFunctionsFromSource("nested02.d", code, true, true);
     assert(withoutNested.length == 1);
     assert(withoutNested[0].funcDecl.ident.toString() == "outer");
 }
@@ -496,13 +496,13 @@ void outerMost()
     void b(){}
 }
 };
-    auto funcs = collectFunctionsFromSource("nested2.d", code);
+    auto funcs = collectFunctionsFromSource("nested03.d", code);
     assert(funcs.length == 3);
     auto expected = normalizeCode("void outerMost(){ void a(){} void b(){} }");
     assert(funcs[0].normalized == expected);
     assert(funcs[0].startLine == 2 && funcs[0].endLine == 6);
 
-    auto withoutNested = collectFunctionsFromSource("nested2.d", code, true, true);
+    auto withoutNested = collectFunctionsFromSource("nested04.d", code, true, true);
     assert(withoutNested.length == 1);
 }
 
