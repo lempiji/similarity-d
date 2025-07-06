@@ -27,6 +27,6 @@ jobs:
       - name: Run tests
         run: dub test --coverage --coverage-ctfe
       - name: Verify coverage
-        run: ./scripts/check-coverage.sh
+        run: ./scripts/check_coverage.d
       - name: CLI smoke test
         run: dub run -- --dir source/lib --exclude-unittests --threshold=0.9 --min-lines=3
