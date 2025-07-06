@@ -31,7 +31,7 @@ dub run similarity-d -- [options]
 
 The CLI compares all functions it finds in the specified directory and prints any matches whose similarity score exceeds the threshold.
 Each result lists the two locations and the calculated similarity.
-The TSED algorithm normalizes identifiers and literals before calculating an edit-distance based score.
+The TED algorithm normalizes identifiers and literals before calculating an edit-distance based score.
 
 When computing similarity a length penalty is applied so that short functions do not dominate the results. This behaviour can be disabled with `--no-size-penalty` if you want the raw tree edit distance score.
 
