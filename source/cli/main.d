@@ -18,8 +18,8 @@ version(unittest)
     __gshared bool lastNoSizePenalty;
     __gshared bool lastPrintResult;
     __gshared bool lastExcludeNested;
-    FunctionInfo[] collectFunctionsInDir(string dir, bool includeUnittests = true, bool excludeNested = false)
     __gshared bool lastHelpWanted;
+    FunctionInfo[] collectFunctionsInDir(string dir, bool includeUnittests = true, bool excludeNested = false)
     {
         lastIncludeUnittests = includeUnittests;
         lastExcludeNested = excludeNested;
