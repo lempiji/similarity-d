@@ -1,4 +1,4 @@
-#!/usr/bin/env -S rdmd
+#!/usr/bin/env rdmd
 import std.stdio;
 import std.file : dirEntries, SpanMode, readText;
 import std.array : array;
