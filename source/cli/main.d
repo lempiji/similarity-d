@@ -5,6 +5,7 @@ module cli.main;
 
 import std.stdio : writeln;
 import std.getopt : getopt, defaultGetoptPrinter, GetoptResult;
+import std.file : exists, isDir;
 
 version(unittest)
 {
@@ -33,7 +34,7 @@ else
 import crossreport : collectMatches, CrossMatch;
 import dmd.frontend : initDMD, deinitializeDMD;
 
-void main(string[] args)
+int main(string[] args)
 {
     double threshold = 0.85;
     size_t minLines = 5;
@@ -72,7 +73,13 @@ void main(string[] args)
     if (helpInfo.helpWanted)
     {
         defaultGetoptPrinter("similarity-d [options]", helpInfo.options);
-        return;
+        return 0;
+    }
+
+    if (!exists(dir) || !isDir(dir))
+    {
+        writeln("Invalid directory: ", dir);
+        return 1;
     }
 
     initDMD();
@@ -98,16 +105,17 @@ void main(string[] args)
     {
         writeln("No similar functions found.");
     }
+    return 0;
 }
 
 unittest
 {
     auto dir = ".";
-    main(["app", "--help"]);
+    assert(main(["app", "--help"]) == 0);
     assert(lastHelpWanted == true);
     lastIncludeUnittests = true;
     lastExcludeNested = false;
-    main(["app", "--dir", dir]);
+    assert(main(["app", "--dir", dir]) == 0);
     assert(lastIncludeUnittests == true);
     assert(lastExcludeNested == false);
     assert(lastThreshold == 0.85);
@@ -117,9 +125,9 @@ unittest
     assert(lastNoSizePenalty == false);
     assert(lastPrintResult == false);
 
-    main(["app", "--dir", dir, "--exclude-unittests",
+    assert(main(["app", "--dir", dir, "--exclude-unittests",
         "--threshold=0.9", "--min-lines=2", "--min-tokens=10",
-        "--cross-file=false", "--no-size-penalty", "--print", "--exclude-nested"]);
+        "--cross-file=false", "--no-size-penalty", "--print", "--exclude-nested"]) == 0);
     assert(lastIncludeUnittests == false);
     assert(lastExcludeNested == true);
     assert(lastThreshold == 0.9);
@@ -134,6 +142,12 @@ unittest
 {
     auto dir = ".";
     lastExcludeNested = false;
-    main(["app", "--dir", dir, "--exclude-nested"]);
+    assert(main(["app", "--dir", dir, "--exclude-nested"]) == 0);
     assert(lastExcludeNested == true);
+}
+
+unittest
+{
+    auto bogus = "./does-not-exist";
+    assert(main(["app", "--dir", bogus]) == 1);
 }
