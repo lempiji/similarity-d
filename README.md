@@ -118,6 +118,8 @@ configuration:
 dub run -- --dir source/lib --exclude-unittests --threshold=0.9 --min-lines=3
 ```
 
+## Dependency Maintenance
+Refresh dependencies with `dub upgrade` and then run the full test suite with coverage. If the tests pass, verify the CLI works as shown above and commit the updated manifest files. See [AGENTS.md](AGENTS.md#dependency-maintenance-dub) for the detailed procedure.
 
 ## Contributing
 
