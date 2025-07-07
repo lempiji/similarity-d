@@ -35,3 +35,5 @@ large code bases, but it can be mitigated by using `--exclude-nested`.
 
 ## Next Steps
 - Update documentation and unit tests.
+
+Japanese translation: [0001-nested-function-collection.ja.md](0001-nested-function-collection.ja.md)
