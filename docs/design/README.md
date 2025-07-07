@@ -1,3 +1,5 @@
+See [README.ja.md](README.ja.md) for the Japanese version.
+
 This directory stores design documentation for *similarity-d*.
 
 Design documents come in two forms:
