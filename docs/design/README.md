@@ -1,5 +1,7 @@
 This directory stores design documentation for *similarity-d*.
 
+Japanese readers can find a translated version in [README.ja.md](README.ja.md).
+
 Design documents come in two forms:
 
 - **Proposals** – feature ideas or enhancements.
