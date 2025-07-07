@@ -1,6 +1,8 @@
 # similarity-d
 [![CI](https://github.com/lempiji/similarity-d/actions/workflows/ci.yml/badge.svg)](https://github.com/lempiji/similarity-d/actions/workflows/ci.yml)
 
+[Japanese README](README.ja.md)
+
 similarity-d is a command-line tool written in D for finding similar functions in a project.
 It uses a Tree Edit Distance (TED) algorithm to compare normalized abstract syntax trees.
 
