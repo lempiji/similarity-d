@@ -4,6 +4,8 @@ date: 2025-07-06
 status: Accepted
 ---
 
+*English version is available [here](0001-default-collect-nested.md).* 
+
 # ADR 0001: デフォルトで入れ子関数を収集する
 
 Originating Proposal: docs/design/proposals/0001-nested-function-collection.md

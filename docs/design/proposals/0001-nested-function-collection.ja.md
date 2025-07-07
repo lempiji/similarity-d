@@ -4,6 +4,8 @@ date: 2025-07-06
 status: Approved
 ---
 
+*English version is available [here](0001-nested-function-collection.md).* 
+
 # 提案: 入れ子関数の収集
 
 ## 動機
