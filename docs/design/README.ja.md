@@ -1,3 +1,5 @@
+**English version:** [README.md](README.md)
+
 このディレクトリには *similarity-d* の設計ドキュメントが保存されています。
 
 設計ドキュメントには以下の2種類があります。

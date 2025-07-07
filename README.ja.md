@@ -1,5 +1,7 @@
 # similarity-d
 
+**English version:** [README.md](README.md)
+
 このリポジトリはD言語で書かれたコマンドラインツール **similarity-d** の日本語版READMEです。プロジェクト内の類似した関数を検出するために、正規化された抽象構文木を比較するTree Edit Distance(TED)アルゴリズムを利用します。
 
 ## 前提条件
