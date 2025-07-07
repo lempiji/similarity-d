@@ -4,6 +4,8 @@ date: 2025-07-06
 status: Accepted
 ---
 
+*Japanese version: [0001-default-collect-nested.ja.md](0001-default-collect-nested.ja.md)*
+
 # ADR 0001: Default Collect Nested Functions
 
 Originating Proposal: docs/design/proposals/0001-nested-function-collection.md
