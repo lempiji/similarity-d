@@ -758,3 +758,19 @@ int b(){ return 1; }
     auto sim = treeSimilarity(funcs[0], funcs[1], false);
     assert(sim >= 0 && sim <= 1);
 }
+
+unittest
+{
+    import std.math : isClose;
+
+    scope DmdInitGuard guard = DmdInitGuard.make();
+
+    string code = q{
+void foo(){}
+void bar(){}
+};
+    auto funcs = collectFunctionsFromSource("empty.d", code);
+    assert(funcs.length == 2);
+    auto sim = treeSimilarity(funcs[0], funcs[1]);
+    assert(isClose(sim, 1.0));
+}
