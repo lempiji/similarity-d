@@ -36,4 +36,4 @@ Collecting nested functions by default may increase memory usage for
 large code bases, but it can be mitigated by using `--exclude-nested`.
 
 ## Next Steps
-- Update documentation and unit tests.
+- Documentation and unit tests were updated in the implementation PR.
