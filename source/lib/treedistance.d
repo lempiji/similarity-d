@@ -141,3 +141,23 @@ unittest
 
     assert(ted(original, replaced) == 1); // one replacement
 }
+
+
+unittest
+{
+    auto single = leaf(NodeKind.Identifier, "solo");
+    assert(treeSize(single) == 1);
+}
+
+unittest
+{
+    auto empty = Node.init;
+    auto tree = Node(NodeKind.Other, "", [
+        leaf(NodeKind.Identifier, "x"),
+        leaf(NodeKind.Literal, "1")
+    ]);
+
+    assert(ted(empty, tree) == treeSize(tree));
+    assert(ted(tree, empty) == treeSize(tree));
+    assert(ted(empty, empty) == 0);
+}
