@@ -1,3 +1,4 @@
+/// Provides DMD initialization helpers for unit tests.
 module testutils;
 
 version(unittest) {
