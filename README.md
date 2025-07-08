@@ -126,7 +126,9 @@ dub test --coverage --coverage-ctfe
 ```
 
 After running the tests, run the coverage check script to ensure each
-`source-*.lst` file reports at least 70% coverage:
+`source-*.lst` file reports at least 70% coverage. Development scripts live in
+the `scripts/` directory, are written in D, and should be executed with
+`rdmd` as described in [scripts/AGENTS.md](scripts/AGENTS.md):
 
 ```bash
 rdmd ./scripts/check_coverage.d
