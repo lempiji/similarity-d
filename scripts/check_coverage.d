@@ -1,4 +1,6 @@
 #!/usr/bin/env rdmd
+// Verify that each generated `source-*.lst` coverage file reports at least
+// a 70% pass rate. Typically run with `rdmd scripts/check_coverage.d`.
 import std.stdio;
 import std.file : dirEntries, SpanMode, readText;
 import std.array : array;
