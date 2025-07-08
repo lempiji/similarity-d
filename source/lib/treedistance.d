@@ -3,7 +3,6 @@
 module treedistance;
 
 import std.algorithm : min;
-import std.typecons : Tuple;
 
 /// Kinds of AST nodes used for tree edit distance.
 public enum NodeKind
