@@ -170,7 +170,26 @@ unittest
 
 unittest
 {
+    import std.file : deleteme, remove, readText;
+    import std.algorithm.searching : canFind;
+    import std.stdio : File, stdout;
+
     auto bogus = "./does-not-exist";
+    auto capturePath = deleteme ~ "-cli-main";
+    auto captureFile = File(capturePath, "w+");
+    auto oldStdout = stdout;
+    stdout = captureFile;
+    scope(exit)
+    {
+        stdout.flush();
+        stdout = oldStdout;
+        captureFile.close();
+        remove(capturePath);
+    }
+
     assert(main(["app", "--dir", bogus]) == 1);
+    captureFile.rewind();
+    auto output = readText(capturePath);
+    assert(output.canFind("Invalid directory: " ~ bogus));
     assert(lastShowVersion == false);
 }
