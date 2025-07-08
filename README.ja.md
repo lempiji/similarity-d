@@ -129,3 +129,8 @@ dub run -- --dir source/lib --exclude-unittests --threshold=0.9 --min-lines=3
 ## コントリビュート
 
 ワークフローやガイドラインは [CONTRIBUTING.md](CONTRIBUTING.md) を参照してください。
+
+## ライセンス
+
+本プロジェクトは [MIT License](LICENSE) のもとで公開されています。
+
