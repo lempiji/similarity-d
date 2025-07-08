@@ -1,6 +1,8 @@
 #!/usr/bin/env rdmd
 // Verify that each generated `source-*.lst` coverage file reports at least
-// a 70% pass rate. Typically run with `rdmd scripts/check_coverage.d`.
+// a 70% pass rate. The coverage summary is found within the last two lines
+// of each file, so both lines are inspected. Typically run with
+// `rdmd scripts/check_coverage.d`.
 import std.stdio;
 import std.file : dirEntries, SpanMode, readText;
 import std.array : array;
@@ -27,20 +29,25 @@ int main()
             fail = true;
             continue;
         }
-        auto lastLine = lines[$-1].strip;
-        auto m = match(lastLine, regex(r"([0-9]+)%"));
-        if (!m.empty)
+        string[] tail = lines.length >= 2 ? lines[$-2 .. $] : lines[$-1 .. $];
+        int perc = -1;
+        foreach (line; tail)
         {
-            int perc = to!int(m.captures[1]);
-            if (perc < 70)
+            auto m = match(line.strip, regex(r"([0-9]+)%"));
+            if (!m.empty)
             {
-                stderr.writefln("Coverage for %s is below 70%%: %s%%", f.name, perc);
-                fail = true;
+                perc = to!int(m.captures[1]);
+                break;
             }
         }
-        else
+        if (perc == -1)
         {
             stderr.writeln("Could not parse coverage percentage from ", f.name);
+            fail = true;
+        }
+        else if (perc < 70)
+        {
+            stderr.writefln("Coverage for %s is below 70%%: %s%%", f.name, perc);
             fail = true;
         }
     }
