@@ -4,7 +4,7 @@ date: 2025-07-06
 status: Accepted
 ---
 
-*A Japanese translation is available [here](0001-default-collect-nested.ja.md).* 
+*A Japanese translation is available [here](0001-default-collect-nested.ja.md).*
 
 # ADR 0001: Default Collect Nested Functions
 

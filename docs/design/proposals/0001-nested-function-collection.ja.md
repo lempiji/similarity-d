@@ -4,7 +4,7 @@ date: 2025-07-06
 status: Approved
 ---
 
-*English version is available [here](0001-nested-function-collection.md).* 
+*English version is available [here](0001-nested-function-collection.md).*
 
 # 提案: 入れ子関数の収集
 
@@ -27,7 +27,7 @@ status: Approved
 入れ子関数はデフォルトで収集され、このフラグが設定されている場合は無視されます。
 
 ## 代替案
-- 既存の AST ヘルパーではなくカスタムビジターでソースを解析する  
+- 既存の AST ヘルパーではなくカスタムビジターでソースを解析する
   → 単純さのため却下
 
 ## 影響とリスク

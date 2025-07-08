@@ -4,7 +4,7 @@ date: 2025-07-06
 status: Approved
 ---
 
-*A Japanese translation is available [here](0001-nested-function-collection.ja.md).* 
+*A Japanese translation is available [here](0001-nested-function-collection.ja.md).*
 
 # Proposal: Nested Function Collection
 
