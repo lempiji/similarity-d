@@ -25,12 +25,13 @@ version(unittest)
     __gshared bool lastHelpWanted;
     __gshared bool lastShowVersion;
     __gshared string lastVersionPrinted;
+    __gshared FunctionInfo[] stubFunctions;
     void printVersion(string s) { lastVersionPrinted = s; }
     FunctionInfo[] collectFunctionsInDir(string dir, bool includeUnittests = true, bool excludeNested = false)
     {
         lastIncludeUnittests = includeUnittests;
         lastExcludeNested = excludeNested;
-        return [];
+        return stubFunctions;
     }
 }
 else
@@ -157,6 +158,43 @@ unittest
     assert(lastNoSizePenalty == true);
     assert(lastPrintResult == true);
     assert(lastShowVersion == false);
+}
+
+unittest
+{
+    import std.file : deleteme, remove, readText;
+    import std.algorithm.searching : canFind;
+    import std.stdio : File, stdout;
+
+    FunctionInfo f1;
+    f1.file = "a.d";
+    f1.startLine = 1;
+    f1.endLine = 1;
+    f1.snippet = "int foo(){return 1;}";
+    FunctionInfo f2;
+    f2.file = "b.d";
+    f2.startLine = 1;
+    f2.endLine = 1;
+    f2.snippet = "int bar(){return 1;}";
+    stubFunctions = [f1, f2];
+
+    auto capturePath = deleteme ~ "-cli-print";
+    auto captureFile = File(capturePath, "w+");
+    auto oldStdout = stdout;
+    stdout = captureFile;
+    scope(exit)
+    {
+        stdout.flush();
+        stdout = oldStdout;
+        captureFile.close();
+        remove(capturePath);
+        stubFunctions.length = 0;
+    }
+
+    assert(main(["app", "--dir", ".", "--print", "--threshold=0", "--min-lines=1", "--min-tokens=0"]) == 0);
+    captureFile.rewind();
+    auto output = readText(capturePath);
+    assert(output.canFind(f1.snippet));
 }
 
 unittest
