@@ -92,6 +92,24 @@ int main(string[] args)
         return 0;
     }
 
+    if (threshold < 0 || threshold > 1)
+    {
+        writeln("Invalid threshold: ", threshold);
+        return 1;
+    }
+
+    if (minLines <= 0)
+    {
+        writeln("Invalid min-lines: ", minLines);
+        return 1;
+    }
+
+    if (minTokens <= 0)
+    {
+        writeln("Invalid min-tokens: ", minTokens);
+        return 1;
+    }
+
     if (!exists(dir) || !isDir(dir))
     {
         writeln("Invalid directory: ", dir);
@@ -192,4 +210,76 @@ unittest
     auto output = readText(capturePath);
     assert(output.canFind("Invalid directory: " ~ bogus));
     assert(lastShowVersion == false);
+}
+
+unittest
+{
+    import std.file : deleteme, remove, readText;
+    import std.algorithm.searching : canFind;
+    import std.stdio : File, stdout;
+
+    auto capturePath = deleteme ~ "-cli-main";
+    auto captureFile = File(capturePath, "w+");
+    auto oldStdout = stdout;
+    stdout = captureFile;
+    scope(exit)
+    {
+        stdout.flush();
+        stdout = oldStdout;
+        captureFile.close();
+        remove(capturePath);
+    }
+
+    assert(main(["app", "--dir", ".", "--threshold=-0.1"]) == 1);
+    captureFile.rewind();
+    auto output = readText(capturePath);
+    assert(output.canFind("Invalid threshold: -0.1"));
+}
+
+unittest
+{
+    import std.file : deleteme, remove, readText;
+    import std.algorithm.searching : canFind;
+    import std.stdio : File, stdout;
+
+    auto capturePath = deleteme ~ "-cli-main";
+    auto captureFile = File(capturePath, "w+");
+    auto oldStdout = stdout;
+    stdout = captureFile;
+    scope(exit)
+    {
+        stdout.flush();
+        stdout = oldStdout;
+        captureFile.close();
+        remove(capturePath);
+    }
+
+    assert(main(["app", "--dir", ".", "--min-lines=0"]) == 1);
+    captureFile.rewind();
+    auto output = readText(capturePath);
+    assert(output.canFind("Invalid min-lines: 0"));
+}
+
+unittest
+{
+    import std.file : deleteme, remove, readText;
+    import std.algorithm.searching : canFind;
+    import std.stdio : File, stdout;
+
+    auto capturePath = deleteme ~ "-cli-main";
+    auto captureFile = File(capturePath, "w+");
+    auto oldStdout = stdout;
+    stdout = captureFile;
+    scope(exit)
+    {
+        stdout.flush();
+        stdout = oldStdout;
+        captureFile.close();
+        remove(capturePath);
+    }
+
+    assert(main(["app", "--dir", ".", "--min-tokens=0"]) == 1);
+    captureFile.rewind();
+    auto output = readText(capturePath);
+    assert(output.canFind("Invalid min-tokens: 0"));
 }
