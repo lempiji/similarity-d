@@ -780,3 +780,36 @@ void outer2()
     assert(names.canFind("outer2"));
 }
 
+unittest
+{
+    import std.file : tempDir, mkdir, rmdirRecurse, write;
+    import std.path : buildPath;
+    import std.datetime.systime : Clock;
+    import std.conv : to;
+    import std.algorithm.searching : canFind;
+
+    auto base = buildPath(tempDir(), "fcnested2-" ~ to!string(Clock.currTime().toUnixTime()));
+    mkdir(base);
+    scope(exit) rmdirRecurse(base);
+
+    mkdir(buildPath(base, "sub"));
+    write(buildPath(base, "top.d"), q{
+void top(){ }
+});
+    write(buildPath(base, "sub", "sub.d"), q{
+void subfn(){ }
+});
+
+    FunctionInfo[] funcs;
+    {
+        scope DmdInitGuard guard = DmdInitGuard.make();
+        funcs = collectFunctionsInDir(base, true, true);
+    }
+
+    assert(funcs.length == 2);
+    string[] names;
+    foreach(f; funcs)
+        names ~= to!string(f.funcDecl.ident.toString());
+    assert(names.canFind("top"));
+    assert(names.canFind("subfn"));
+}
