@@ -78,15 +78,15 @@ version(unittest)
 
 unittest
 {
-    auto a = Node(NodeKind.Other, "",
+    auto nodeA = Node(NodeKind.Other, "",
         [leaf(NodeKind.Identifier, "<id>"),
          leaf(NodeKind.Literal, "<lit>")]);
-    auto b = Node(NodeKind.Other, "",
+    auto nodeB = Node(NodeKind.Other, "",
         [leaf(NodeKind.Identifier, "<id>"),
          leaf(NodeKind.Literal, "<lit>"),
          leaf(NodeKind.Keyword, "if")]);
-    assert(ted(a, a) == 0);
-    assert(ted(a, b) == 1); // one insertion
+    assert(ted(nodeA, nodeA) == 0);
+    assert(ted(nodeA, nodeB) == 1); // one insertion
 
     // Deleting a subtree should cost its size (3 nodes here).
     auto complex = Node(NodeKind.Other, "",
@@ -108,7 +108,7 @@ unittest
     assert(ted(c, d) == 1);
 
     // Symmetry property.
-    assert(ted(a, b) == ted(b, a));
+    assert(ted(nodeA, nodeB) == ted(nodeB, nodeA));
 }
 
 unittest

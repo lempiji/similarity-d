@@ -1,5 +1,6 @@
 module file_a;
 
+/// Outer function used in nested samples.
 void outerA()
 {
     int addOne(int x)
@@ -11,3 +12,4 @@ void outerA()
     import std.stdio : writeln;
     writeln(y);
 }
+

@@ -1,3 +1,4 @@
+/// Short function used by unit tests.
 int shortFunc()
 {
     int x = 0;
@@ -5,6 +6,7 @@ int shortFunc()
         x += i;
     return x;
 }
+/// Slightly longer function used by unit tests.
 
 int biggerFunc()
 {
@@ -15,3 +17,4 @@ int biggerFunc()
         y += 3;
     return y;
 }
+
