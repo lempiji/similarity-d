@@ -87,7 +87,7 @@ void collectMatches(Sink)(FunctionInfo[] funcs, double threshold, size_t minLine
             if (!crossFile && f1.file != f2.file)
                 continue;
 
-            auto sim = treeSimilarity(f1, f2, !noSizePenalty);
+            const sim = treeSimilarity(f1, f2, !noSizePenalty);
             if (sim >= threshold)
             {
                 CrossMatch m;
@@ -115,7 +115,7 @@ void collectMatches(Sink)(FunctionInfo[] funcs, double threshold, size_t minLine
 
 unittest
 {
-    scope DmdInitGuard guard = DmdInitGuard.make();
+    scope const(DmdInitGuard) _ = DmdInitGuard.make();
 
     string codeA = q{
 int foo(){ return 1; }
@@ -142,7 +142,7 @@ int bar(){ return 1; }
 
 unittest
 {
-    scope DmdInitGuard guard = DmdInitGuard.make();
+    scope const(DmdInitGuard) _ = DmdInitGuard.make();
 
     string code = q{
 int a(){ return 0; }
@@ -153,14 +153,15 @@ int c(){ return 0; }
     CrossMatch[] matches;
     collectMatches(funcs, 0.0, 1, 1, false, true, (CrossMatch m){ matches ~= m; });
     assert(matches.length == 3); // three pairs
-    foreach(i; 0 .. matches.length - 1)
+    const len = matches.length;
+    foreach(i; 0 .. len - 1)
         assert(matches[i].priority >= matches[i + 1].priority);
 }
 
 unittest
 {
     import std.conv : to;
-    scope DmdInitGuard guard = DmdInitGuard.make();
+    scope const(DmdInitGuard) _ = DmdInitGuard.make();
 
     enum count = 150;
     string code;
@@ -168,14 +169,15 @@ unittest
         code ~= "int fn" ~ i.to!string() ~ "(){ return " ~ i.to!string() ~ "; }\n";
     auto funcs = collectFunctionsFromSource("big.d", code);
     size_t pairs;
-    collectMatches(funcs, 0.0, 1, 1, false, true, (CrossMatch m){ ++pairs; });
-    auto expected = funcs.length * (funcs.length - 1) / 2;
+    const len = funcs.length;
+    collectMatches(funcs, 0.0, 1, 1, false, true, (CrossMatch _){ ++pairs; });
+    const expected = len * (len - 1) / 2;
     assert(pairs == expected);
 }
 
 unittest
 {
-    scope DmdInitGuard guard = DmdInitGuard.make();
+    scope const(DmdInitGuard) _ = DmdInitGuard.make();
 
     string code = q{
 int foo(){
@@ -203,7 +205,7 @@ int bar(){
 
 unittest
 {
-    scope DmdInitGuard guard = DmdInitGuard.make();
+    scope const(DmdInitGuard) _ = DmdInitGuard.make();
 
     string code = q{
 int foo(){
@@ -237,7 +239,7 @@ int bar(){
 unittest
 {
 
-    scope DmdInitGuard guard = DmdInitGuard.make();
+    scope const(DmdInitGuard) _ = DmdInitGuard.make();
 
     string code = q{
 int foo(){ return 1; }
@@ -267,7 +269,7 @@ int bar(){ return 2; }
 unittest
 {
 
-    scope DmdInitGuard guard = DmdInitGuard.make();
+    scope const(DmdInitGuard) _ = DmdInitGuard.make();
 
     string foo = "int foo(){ return 1; }";
     string bar = "int bar(){ return 1; }";

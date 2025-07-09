@@ -370,7 +370,7 @@ unittest
 {
     import std.math : isClose;
 
-    scope DmdInitGuard guard = DmdInitGuard.make();
+    scope const(DmdInitGuard) _ = DmdInitGuard.make();
 
     string code = q{
 int foo(){ return 1; }
@@ -390,7 +390,7 @@ int foo(){ return 1; }
 unittest
 {
 
-    scope DmdInitGuard guard = DmdInitGuard.make();
+    scope const(DmdInitGuard) _ = DmdInitGuard.make();
 
     string code = q{
 int foo(){ return 1; }
@@ -405,7 +405,7 @@ int foo(){ return 1; }
 unittest
 {
 
-    scope DmdInitGuard guard = DmdInitGuard.make();
+    scope const(DmdInitGuard) _ = DmdInitGuard.make();
 
     string code = q{
 class C{ int x; this(int n){ this.x = n; } }
@@ -435,8 +435,8 @@ public double treeSimilarity(FunctionInfo a, FunctionInfo b, bool sizePenalty=tr
     auto sizeB = treeSize(tb) - 1;
     if (sizeA == 0 && sizeB == 0)
         return 1.0;
-    auto dist = ted(ta, tb);
-    auto maxlen = max(sizeA, sizeB);
+    const dist = ted(ta, tb);
+    const maxlen = max(sizeA, sizeB);
     double score = 1.0 - cast(double)dist / maxlen;
     // clamp to [0,1] in case dist > maxlen or negative rounding issues
     if (score < 0) score = 0;
@@ -454,7 +454,7 @@ unittest
 {
     import std.math : isClose;
 
-    scope DmdInitGuard guard = DmdInitGuard.make();
+    scope const(DmdInitGuard) _ = DmdInitGuard.make();
 
     string code = q{
 int foo(int x){ return x + 1; }
@@ -480,7 +480,7 @@ unittest
 {
     import std.math : isClose;
 
-    scope DmdInitGuard guard = DmdInitGuard.make();
+    scope const(DmdInitGuard) _ = DmdInitGuard.make();
 
     string code = q{
 int foo(){ int a = 1; return a; }
@@ -488,7 +488,7 @@ int bar(){ int b = 1; return b; }
 };
     auto funcs = collectFunctionsFromSource("rename.d", code);
     assert(funcs.length == 2);
-    auto sim = treeSimilarity(funcs[0], funcs[1]);
+    const sim = treeSimilarity(funcs[0], funcs[1]);
     // Renaming variables should yield identical trees
     import std.math : isClose;
     assert(isClose(sim, 1.0));
@@ -499,7 +499,7 @@ unittest
 {
     import std.math : isClose;
 
-    scope DmdInitGuard guard = DmdInitGuard.make();
+    scope const(DmdInitGuard) _ = DmdInitGuard.make();
 
     string code = q{
 int foo(int x){ return x + 1; }
@@ -507,7 +507,7 @@ int bar(int x){ return x - 1; }
 };
     auto funcs = collectFunctionsFromSource("op.d", code);
     assert(funcs.length == 2);
-    auto sim = treeSimilarity(funcs[0], funcs[1]);
+    const sim = treeSimilarity(funcs[0], funcs[1]);
     // Only the operator differs -> expect high similarity (~0.8)
     assert(isClose(sim, 0.8, 0.01));
 }
@@ -517,7 +517,7 @@ unittest
 {
     import std.math : isClose;
 
-    scope DmdInitGuard guard = DmdInitGuard.make();
+    scope const(DmdInitGuard) _ = DmdInitGuard.make();
 
     string code = q{
 int foo(){ return 1; }
@@ -525,7 +525,7 @@ int bar(){ return 2; }
 };
     auto funcs = collectFunctionsFromSource("lit.d", code);
     assert(funcs.length == 2);
-    auto sim = treeSimilarity(funcs[0], funcs[1]);
+    const sim = treeSimilarity(funcs[0], funcs[1]);
     // Literal changes shouldn't affect similarity
     import std.math : isClose;
     assert(isClose(sim, 1.0));
@@ -535,7 +535,7 @@ int bar(){ return 2; }
 unittest
 {
 
-    scope DmdInitGuard guard = DmdInitGuard.make();
+    scope const(DmdInitGuard) _ = DmdInitGuard.make();
 
     string code = q{
 int foo(int x){
@@ -548,7 +548,7 @@ int bar(int x){
 };
     auto funcs = collectFunctionsFromSource("if.d", code);
     assert(funcs.length == 2);
-    auto sim = treeSimilarity(funcs[0], funcs[1]);
+    const sim = treeSimilarity(funcs[0], funcs[1]);
     // Extra branch lowers similarity to about 0.05
     assert(sim > 0 && sim < 0.1);
 }
@@ -557,7 +557,7 @@ int bar(int x){
 unittest
 {
 
-    scope DmdInitGuard guard = DmdInitGuard.make();
+    scope const(DmdInitGuard) _ = DmdInitGuard.make();
 
     string code = q{
 int foo(){ return 1; }
@@ -565,7 +565,7 @@ int bar(){ try{ return 1; }catch(Exception e){ return 0; } }
 };
     auto funcs = collectFunctionsFromSource("try.d", code);
     assert(funcs.length == 2);
-    auto sim = treeSimilarity(funcs[0], funcs[1]);
+    const sim = treeSimilarity(funcs[0], funcs[1]);
     // Try/catch wrapper produces similarity around 0.12
     assert(sim > 0.1 && sim < 0.2);
 }
@@ -575,7 +575,7 @@ unittest
 {
     import std.math : isClose;
 
-    scope DmdInitGuard guard = DmdInitGuard.make();
+    scope const(DmdInitGuard) _ = DmdInitGuard.make();
 
     string code = q{
 int foo(int x){ return x + 1; }
@@ -583,7 +583,7 @@ int bar(int x){ return x + 2; }
 };
     auto funcs = collectFunctionsFromSource("leaf.d", code);
     assert(funcs.length == 2);
-    auto sim = treeSimilarity(funcs[0], funcs[1]);
+    const sim = treeSimilarity(funcs[0], funcs[1]);
     // Expression tweak keeps similarity almost perfect
     import std.math : isClose;
     assert(isClose(sim, 1.0));
@@ -593,7 +593,7 @@ int bar(int x){ return x + 2; }
 unittest
 {
 
-    scope DmdInitGuard guard = DmdInitGuard.make();
+    scope const(DmdInitGuard) _ = DmdInitGuard.make();
 
     string code = q{
 int foo(int[] a){ int s=0; for(int i=0;i<a.length;i++) s+=a[i]; return s; }
@@ -601,7 +601,7 @@ int bar(int[] a){ int s=0; foreach(i; a) s+=i; return s; }
 };
     auto funcs = collectFunctionsFromSource("loop.d", code);
     assert(funcs.length == 2);
-    auto sim = treeSimilarity(funcs[0], funcs[1]);
+    const sim = treeSimilarity(funcs[0], funcs[1]);
     // for vs foreach yields around 0.2 similarity
     assert(sim > 0.15 && sim < 0.25);
 }
@@ -610,7 +610,7 @@ int bar(int[] a){ int s=0; foreach(i; a) s+=i; return s; }
 unittest
 {
 
-    scope DmdInitGuard guard = DmdInitGuard.make();
+    scope const(DmdInitGuard) _ = DmdInitGuard.make();
 
     string code = q{
 int foo(int n){ int i=0; for(; i<n; ++i){} return i; }
@@ -618,7 +618,7 @@ int bar(int n){ int i=0; while(i<n) ++i; return i; }
 };
     auto funcs = collectFunctionsFromSource("loop2.d", code);
     assert(funcs.length == 2);
-    auto sim = treeSimilarity(funcs[0], funcs[1]);
+    const sim = treeSimilarity(funcs[0], funcs[1]);
     // for vs while yields about 0.5 similarity
     assert(sim > 0.45 && sim < 0.55);
 }
@@ -627,7 +627,7 @@ int bar(int n){ int i=0; while(i<n) ++i; return i; }
 unittest
 {
 
-    scope DmdInitGuard guard = DmdInitGuard.make();
+    scope const(DmdInitGuard) _ = DmdInitGuard.make();
 
     string code = q{
 int foo(int x){ if(x>0){ if(x>1) return x;} return -x; }
@@ -635,7 +635,7 @@ int bar(int x){ if(x>0) return x; return -x; }
 };
     auto funcs = collectFunctionsFromSource("nested.d", code);
     assert(funcs.length == 2);
-    auto sim = treeSimilarity(funcs[0], funcs[1]);
+    const sim = treeSimilarity(funcs[0], funcs[1]);
     // Nested conditionals drop similarity to about 0.34
     assert(sim > 0.3 && sim < 0.4);
 }
@@ -644,7 +644,7 @@ int bar(int x){ if(x>0) return x; return -x; }
 unittest
 {
 
-    scope DmdInitGuard guard = DmdInitGuard.make();
+    scope const(DmdInitGuard) _ = DmdInitGuard.make();
 
     string code = q{
 int foo(){ return 1; }
@@ -652,7 +652,7 @@ void bar(string s){ import std.stdio; writeln(s); }
 };
     auto funcs = collectFunctionsFromSource("diff.d", code);
     assert(funcs.length == 2);
-    auto sim = treeSimilarity(funcs[0], funcs[1]);
+    const sim = treeSimilarity(funcs[0], funcs[1]);
     // Expect very low similarity (~0.12)
     assert(sim > 0 && sim < 0.2);
 }
@@ -661,7 +661,7 @@ void bar(string s){ import std.stdio; writeln(s); }
 unittest
 {
 
-    scope DmdInitGuard guard = DmdInitGuard.make();
+    scope const(DmdInitGuard) _ = DmdInitGuard.make();
 
     string code = q{
 int foo(int x){
@@ -695,7 +695,7 @@ unittest
 {
     import std.math : isClose;
 
-    scope DmdInitGuard guard = DmdInitGuard.make();
+    scope const(DmdInitGuard) _ = DmdInitGuard.make();
 
     string code = q{
 int foo(int a){ int x = a * 2; return x; }
@@ -703,7 +703,7 @@ int bar(int b){ int y = b * 2; return y; }
 };
     auto funcs = collectFunctionsFromSource("rename2.d", code);
     assert(funcs.length == 2);
-    auto sim = treeSimilarity(funcs[0], funcs[1]);
+    const sim = treeSimilarity(funcs[0], funcs[1]);
     // variable and parameter names differ but structure identical -> ~1.0
     assert(isClose(sim, 1.0));
 }
@@ -713,7 +713,7 @@ unittest
 {
     import std.math : isClose;
 
-    scope DmdInitGuard guard = DmdInitGuard.make();
+    scope const(DmdInitGuard) _ = DmdInitGuard.make();
 
     string code = q{
 int foo(){ return 42; }
@@ -721,7 +721,7 @@ int bar(){ return 1337; }
 };
     auto funcs = collectFunctionsFromSource("literal2.d", code);
     assert(funcs.length == 2);
-    auto sim = treeSimilarity(funcs[0], funcs[1]);
+    const sim = treeSimilarity(funcs[0], funcs[1]);
     // literals normalized -> expect 1.0
     assert(isClose(sim, 1.0));
 }
@@ -730,7 +730,7 @@ int bar(){ return 1337; }
 unittest
 {
 
-    scope DmdInitGuard guard = DmdInitGuard.make();
+    scope const(DmdInitGuard) _ = DmdInitGuard.make();
 
     string code = q{
 int foo(int n){ int i=0; do{ ++i; } while(i<n); return i; }
@@ -738,7 +738,7 @@ int bar(int n){ int i=0; while(i<n){ ++i; } return i; }
 };
     auto funcs = collectFunctionsFromSource("loop3.d", code);
     assert(funcs.length == 2);
-    auto sim = treeSimilarity(funcs[0], funcs[1]);
+    const sim = treeSimilarity(funcs[0], funcs[1]);
     import std.math : isClose;
     // do-while vs while loops retain partial structural similarity
     assert(isClose(sim, 0.461538, 0.01));
@@ -748,14 +748,14 @@ unittest
 {
     import std.math : isClose;
 
-    scope DmdInitGuard guard = DmdInitGuard.make();
+    scope const(DmdInitGuard) _ = DmdInitGuard.make();
 
     string code = q{
 int a(){ return 0; }
 int b(){ return 1; }
 };
     auto funcs = collectFunctionsFromSource("penalty.d", code);
-    auto sim = treeSimilarity(funcs[0], funcs[1], false);
+    const sim = treeSimilarity(funcs[0], funcs[1], false);
     assert(sim >= 0 && sim <= 1);
 }
 
@@ -763,7 +763,7 @@ unittest
 {
     import std.math : isClose;
 
-    scope DmdInitGuard guard = DmdInitGuard.make();
+    scope const(DmdInitGuard) _ = DmdInitGuard.make();
 
     string code = q{
 void foo(){}
@@ -771,6 +771,6 @@ void bar(){}
 };
     auto funcs = collectFunctionsFromSource("empty.d", code);
     assert(funcs.length == 2);
-    auto sim = treeSimilarity(funcs[0], funcs[1]);
+    const sim = treeSimilarity(funcs[0], funcs[1]);
     assert(isClose(sim, 1.0));
 }

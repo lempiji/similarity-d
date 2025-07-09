@@ -56,12 +56,13 @@ private struct UnitTestFlagGuard
 private string normalizeCode(string code)
 {
     auto buffer = code.dup ~ "\0";
-    scope Lexer lex = new Lexer(null, buffer.ptr, 0, buffer.length - 1,
+    auto len = buffer.length;
+    scope Lexer lex = new Lexer(null, buffer.ptr, 0, len - 1,
         false, false, global.errorSinkNull, &global.compileEnv);
     string[] tokens;
     for (;;)
     {
-        auto tok = lex.nextToken();
+        const tok = lex.nextToken();
         if (tok == TOK.endOfFile)
             break;
         tokens ~= to!string(lex.token.toString());
@@ -304,7 +305,7 @@ private FunctionInfo[] collectFunctions(Module mod, string code, bool includeUni
 public FunctionInfo[] collectFunctionsFromSource(string filename, string code,
     bool includeUnittests = true, bool excludeNested = false)
 {
-    scope UnitTestFlagGuard guard = UnitTestFlagGuard(includeUnittests);
+    scope const(UnitTestFlagGuard) _ = UnitTestFlagGuard(includeUnittests);
 
     auto t = parseModule(filename, code);
     return collectFunctions(t.module_, code, includeUnittests, excludeNested);
@@ -313,10 +314,10 @@ public FunctionInfo[] collectFunctionsFromSource(string filename, string code,
 /// Parse a D source file and collect its functions
 public FunctionInfo[] collectFunctionsInFile(string path, bool includeUnittests = true, bool excludeNested = false)
 {
-    scope UnitTestFlagGuard guard = UnitTestFlagGuard(includeUnittests);
+    scope const(UnitTestFlagGuard) _ = UnitTestFlagGuard(includeUnittests);
 
-    auto t = parseModule(path);
-    auto mod = t.module_;
+    const t = parseModule(path);
+    auto mod = cast(Module) t.module_;
     auto code = readText(path);
     return collectFunctions(mod, code, includeUnittests, excludeNested);
 }
@@ -325,7 +326,7 @@ public FunctionInfo[] collectFunctionsInFile(string path, bool includeUnittests 
 public FunctionInfo[] collectFunctionsInDir(string dir, bool includeUnittests = true, bool excludeNested = false)
 {
     FunctionInfo[] results;
-    scope UnitTestFlagGuard guard = UnitTestFlagGuard(includeUnittests);
+    scope const(UnitTestFlagGuard) _ = UnitTestFlagGuard(includeUnittests);
 
     foreach (entry; dirEntries(dir, "*.d", SpanMode.depth))
     {
@@ -337,7 +338,7 @@ public FunctionInfo[] collectFunctionsInDir(string dir, bool includeUnittests = 
 
 unittest
 {
-    scope DmdInitGuard guard = DmdInitGuard.make();
+    scope const(DmdInitGuard) _ = DmdInitGuard.make();
 
     string code = q{
 int foo() { // comment
@@ -355,7 +356,7 @@ int bar(int x)
 
 unittest
 {
-    scope DmdInitGuard guard = DmdInitGuard.make();
+    scope const(DmdInitGuard) _ = DmdInitGuard.make();
 
     string code = q{
 struct S
@@ -365,14 +366,14 @@ struct S
 };
     auto funcs = collectFunctionsFromSource("struct.d", code);
     assert(funcs.length == 1);
-    auto expected = normalizeCode("int foo(){ return 1; }");
+    const expected = normalizeCode("int foo(){ return 1; }");
     assert(funcs[0].normalized == expected);
     assert(funcs[0].startLine == 4 && funcs[0].endLine == 4);
 }
 
 unittest
 {
-    scope DmdInitGuard guard = DmdInitGuard.make();
+    scope const(DmdInitGuard) _ = DmdInitGuard.make();
 
     string code = q{
 class C
@@ -382,14 +383,14 @@ class C
 };
     auto funcs = collectFunctionsFromSource("class.d", code);
     assert(funcs.length == 1);
-    auto expected = normalizeCode("void bar(){ }");
+    const expected = normalizeCode("void bar(){ }");
     assert(funcs[0].normalized == expected);
     assert(funcs[0].startLine == 4 && funcs[0].endLine == 4);
 }
 
 unittest
 {
-    scope DmdInitGuard guard = DmdInitGuard.make();
+    scope const(DmdInitGuard) _ = DmdInitGuard.make();
 
     string code = q{
 mixin template Temp()
@@ -399,14 +400,14 @@ mixin template Temp()
 };
     auto funcs = collectFunctionsFromSource("templ.d", code);
     assert(funcs.length == 1);
-    auto expected = normalizeCode("int tfoo(){ return 1; }");
+    const expected = normalizeCode("int tfoo(){ return 1; }");
     assert(funcs[0].normalized == expected);
     assert(funcs[0].startLine == 4 && funcs[0].endLine == 4);
 }
 
 unittest
 {
-    scope DmdInitGuard guard = DmdInitGuard.make();
+    scope const(DmdInitGuard) _ = DmdInitGuard.make();
 
     string code = q{
 void outer()
@@ -416,18 +417,18 @@ void outer()
 };
     auto funcs = collectFunctionsFromSource("nested01.d", code);
     assert(funcs.length == 2);
-    auto expected = normalizeCode("void outer(){ int inner(){ return 1; } }");
+    const expected = normalizeCode("void outer(){ int inner(){ return 1; } }");
     assert(funcs[0].normalized == expected);
     assert(funcs[0].startLine == 2 && funcs[0].endLine == 5);
 
-    auto withoutNested = collectFunctionsFromSource("nested02.d", code, true, true);
+    const withoutNested = collectFunctionsFromSource("nested02.d", code, true, true);
     assert(withoutNested.length == 1);
     assert(withoutNested[0].funcDecl.ident.toString() == "outer");
 }
 
 unittest
 {
-    scope DmdInitGuard guard = DmdInitGuard.make();
+    scope const(DmdInitGuard) _ = DmdInitGuard.make();
 
     string code = q{
 struct Multi
@@ -440,13 +441,13 @@ struct Multi
     assert(funcs.length == 2);
     assert(funcs[0].startLine == 4);
     assert(funcs[1].startLine == 5);
-    auto expected = normalizeCode("int a(){ return 1; }");
+    const expected = normalizeCode("int a(){ return 1; }");
     assert(funcs[0].normalized == expected || funcs[1].normalized == expected);
 }
 
 unittest
 {
-    scope DmdInitGuard guard = DmdInitGuard.make();
+    scope const(DmdInitGuard) _ = DmdInitGuard.make();
 
     string code = q{
 struct Gen(T)
@@ -456,14 +457,14 @@ struct Gen(T)
 };
     auto funcs = collectFunctionsFromSource("genstruct.d", code);
     assert(funcs.length == 1);
-    auto expected = normalizeCode("T get(T v){ return v; }");
+    const expected = normalizeCode("T get(T v){ return v; }");
     assert(funcs[0].normalized == expected);
     assert(funcs[0].startLine == 4 && funcs[0].endLine == 4);
 }
 
 unittest
 {
-    scope DmdInitGuard guard = DmdInitGuard.make();
+    scope const(DmdInitGuard) _ = DmdInitGuard.make();
 
     string code = q{
 class Many
@@ -474,7 +475,7 @@ class Many
 };
     auto funcs = collectFunctionsFromSource("many.d", code);
     assert(funcs.length == 2);
-    auto expected = normalizeCode("static int s(){ return 1; }");
+    const expected = normalizeCode("static int s(){ return 1; }");
     bool found;
     foreach(f; funcs)
         if(f.normalized == expected)
@@ -487,7 +488,7 @@ class Many
 
 unittest
 {
-    scope DmdInitGuard guard = DmdInitGuard.make();
+    scope const(DmdInitGuard) _ = DmdInitGuard.make();
 
     string code = q{
 void outerMost()
@@ -498,17 +499,17 @@ void outerMost()
 };
     auto funcs = collectFunctionsFromSource("nested03.d", code);
     assert(funcs.length == 3);
-    auto expected = normalizeCode("void outerMost(){ void a(){} void b(){} }");
+    const expected = normalizeCode("void outerMost(){ void a(){} void b(){} }");
     assert(funcs[0].normalized == expected);
     assert(funcs[0].startLine == 2 && funcs[0].endLine == 6);
 
-    auto withoutNested = collectFunctionsFromSource("nested04.d", code, true, true);
+    const withoutNested = collectFunctionsFromSource("nested04.d", code, true, true);
     assert(withoutNested.length == 1);
 }
 
 unittest
 {
-    scope DmdInitGuard guard = DmdInitGuard.make();
+    scope const(DmdInitGuard) _ = DmdInitGuard.make();
 
     string code = q{
 int foo(){ return 1; }
@@ -521,13 +522,13 @@ unittest { assert(foo()); }
 
 unittest
 {
-    scope DmdInitGuard guard = DmdInitGuard.make();
+    scope const(DmdInitGuard) _ = DmdInitGuard.make();
 
     string code = q{
 int foo(){ return 1; }
 unittest { assert(foo()); }
 };
-    auto funcs = collectFunctionsFromSource("ut.d", code, false);
+    const funcs = collectFunctionsFromSource("ut.d", code, false);
     assert(funcs.length == 1);
 }
 
@@ -559,7 +560,7 @@ unittest
 
     FunctionInfo[] withUT;
     {
-        scope DmdInitGuard guard = DmdInitGuard.make();
+        scope const(DmdInitGuard) _ = DmdInitGuard.make();
         withUT = collectFunctionsInDir(dir);
     }
     assert(withUT.length == 3);
@@ -571,7 +572,7 @@ unittest
 
     FunctionInfo[] withoutUT;
     {
-        scope DmdInitGuard guard = DmdInitGuard.make();
+        scope const(DmdInitGuard) _ = DmdInitGuard.make();
         withoutUT = collectFunctionsInDir(dir, false);
     }
     assert(withoutUT.length == 2);
@@ -581,7 +582,7 @@ unittest
 
 unittest
 {
-    scope DmdInitGuard guard = DmdInitGuard.make();
+    scope const(DmdInitGuard) _ = DmdInitGuard.make();
 
     string code = q{
 void outer()
@@ -616,7 +617,7 @@ void outer()
 
 unittest
 {
-    scope DmdInitGuard guard = DmdInitGuard.make();
+    scope const(DmdInitGuard) _ = DmdInitGuard.make();
 
     string code = q{
 void outerAll(int x)
@@ -729,7 +730,7 @@ void outerAll(int x)
 
 unittest
 {
-    scope DmdInitGuard guard = DmdInitGuard.make();
+    scope const(DmdInitGuard) _ = DmdInitGuard.make();
 
     string code = q{
 deprecated {
@@ -768,7 +769,7 @@ void outer2()
 
     FunctionInfo[] funcs;
     {
-        scope DmdInitGuard guard = DmdInitGuard.make();
+        scope const(DmdInitGuard) _ = DmdInitGuard.make();
         funcs = collectFunctionsInDir(dir, true, true);
     }
 
@@ -802,7 +803,7 @@ void subfn(){ }
 
     FunctionInfo[] funcs;
     {
-        scope DmdInitGuard guard = DmdInitGuard.make();
+        scope const(DmdInitGuard) _ = DmdInitGuard.make();
         funcs = collectFunctionsInDir(base, true, true);
     }
 

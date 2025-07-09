@@ -1,5 +1,6 @@
 module file_b;
 
+/// Another outer function for nested sample.
 void outerB()
 {
     int addOne(int x)
@@ -11,3 +12,4 @@ void outerB()
     foreach(i; 0 .. 2)
         writeln(addOne(i));
 }
+

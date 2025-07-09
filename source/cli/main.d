@@ -8,6 +8,7 @@ import std.getopt : getopt, defaultGetoptPrinter, GetoptResult;
 import std.file : exists, isDir;
 import std.json : parseJSON;
 
+/// Version string extracted from `dub.json`.
 enum packageVersion = parseJSON(import("dub.json"))["version"].str;
 
 version(unittest)
@@ -27,7 +28,7 @@ version(unittest)
     __gshared string lastVersionPrinted;
     __gshared FunctionInfo[] stubFunctions;
     void printVersion(string s) { lastVersionPrinted = s; }
-    FunctionInfo[] collectFunctionsInDir(string dir, bool includeUnittests = true, bool excludeNested = false)
+    FunctionInfo[] collectFunctionsInDir(string _, bool includeUnittests = true, bool excludeNested = false)
     {
         lastIncludeUnittests = includeUnittests;
         lastExcludeNested = excludeNested;
