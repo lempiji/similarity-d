@@ -123,9 +123,8 @@ int foo(){ return 1; }
     string codeB = q{
 int bar(){ return 1; }
 };
-    auto fA = collectFunctionsFromSource("a.d", codeA);
-    auto fB = collectFunctionsFromSource("b.d", codeB);
-    auto all = fA ~ fB;
+    auto all = collectFunctionsFromSource("a.d", codeA) ~
+               collectFunctionsFromSource("b.d", codeB);
 
     CrossMatch[] matches;
     // cross-file disabled should yield no matches
