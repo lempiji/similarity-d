@@ -26,6 +26,8 @@ jobs:
           restore-keys: dub-${{ runner.os }}-${{ matrix.dlang }}-
       - name: Run tests
         run: dub test --coverage --coverage-ctfe
+      - name: Lint sources
+        run: dub lint
       - name: Verify coverage
         run: ./scripts/check_coverage.d
       - name: CLI smoke test

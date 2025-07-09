@@ -37,6 +37,7 @@ version(unittest)
 else
 {
     import functioncollector : collectFunctionsInDir;
+    /// Write the supplied version string to standard output.
     void printVersion(string s) { writeln(s); }
 }
 import crossreport : collectMatches, CrossMatch;
@@ -198,7 +199,7 @@ unittest
 
     auto capturePath = deleteme ~ "-cli-print";
     auto captureFile = File(capturePath, "w+");
-    auto oldStdout = stdout;
+    const oldStdout = stdout;
     stdout = captureFile;
     scope(exit)
     {
@@ -233,7 +234,7 @@ unittest
     auto bogus = "./does-not-exist";
     auto capturePath = deleteme ~ "-cli-main";
     auto captureFile = File(capturePath, "w+");
-    auto oldStdout = stdout;
+    const oldStdout = stdout;
     stdout = captureFile;
     scope(exit)
     {
@@ -258,7 +259,7 @@ unittest
 
     auto capturePath = deleteme ~ "-cli-main";
     auto captureFile = File(capturePath, "w+");
-    auto oldStdout = stdout;
+    const oldStdout = stdout;
     stdout = captureFile;
     scope(exit)
     {
@@ -282,7 +283,7 @@ unittest
 
     auto capturePath = deleteme ~ "-cli-main";
     auto captureFile = File(capturePath, "w+");
-    auto oldStdout = stdout;
+    const oldStdout = stdout;
     stdout = captureFile;
     scope(exit)
     {
@@ -306,7 +307,7 @@ unittest
 
     auto capturePath = deleteme ~ "-cli-main";
     auto captureFile = File(capturePath, "w+");
-    auto oldStdout = stdout;
+    const oldStdout = stdout;
     stdout = captureFile;
     scope(exit)
     {
