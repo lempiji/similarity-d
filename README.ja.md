@@ -103,28 +103,8 @@ No similar functions found.
 
 ## 開発
 
-プルリクエストを送る前に必ずテストスイートを実行してください。各モジュールで70%以上のカバレッジが求められます。
-
-```bash
-dub test --coverage --coverage-ctfe
-```
-
-テスト後、`source-*.lst` 各ファイルが少なくとも70%のカバレッジを示すか確認するため次を実行します:
-
-```bash
-rdmd ./scripts/check_coverage.d
-```
-閾値を下回るファイルがあるとスクリプトはエラーで終了します。
-
-CLI が問題なく動作するか、最小構成で確認します:
-
-```bash
-dub run -- --dir source/lib --exclude-unittests --threshold=0.9 --min-lines=3
-```
-
-## 依存関係の管理
-
-`dub upgrade` で依存関係を更新した後、テストスイートを実行してカバレッジを取得してください。テストが通ったら上記の手順でCLIが動作するか確認し、更新されたマニフェストファイルをコミットします。詳細な手順は [AGENTS.md](AGENTS.md#dependency-maintenance-dub) を参照してください。
+開発手順や依存関係の管理方法については
+[CONTRIBUTING.md](CONTRIBUTING.md) を参照してください。
 
 ## コントリビュート
 

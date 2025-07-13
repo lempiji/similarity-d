@@ -118,32 +118,8 @@ No similar functions found.
 
 ## Development
 
-Run the full test suite before sending a pull request.  The project expects
-coverage information to be generated and kept above 70% for each module.
-
-```bash
-dub test --coverage --coverage-ctfe
-```
-
-After running the tests, run the coverage check script to ensure each
-`source-*.lst` file reports at least 70% coverage. Development scripts live in
-the `scripts/` directory, are written in D, and should be executed with
-`rdmd` as described in [scripts/AGENTS.md](scripts/AGENTS.md):
-
-```bash
-rdmd ./scripts/check_coverage.d
-```
-The script exits with an error if any coverage file is below the threshold.
-
-To verify the command line interface still works, invoke it with a minimal
-configuration:
-
-```bash
-dub run -- --dir source/lib --exclude-unittests --threshold=0.9 --min-lines=3
-```
-
-## Dependency Maintenance
-Refresh dependencies with `dub upgrade` and then run the full test suite with coverage. If the tests pass, verify the CLI works as shown above and commit the updated manifest files. See [AGENTS.md](AGENTS.md#dependency-maintenance-dub) for the detailed procedure.
+Developer guidelines, including dependency maintenance, are available in
+[CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Contributing
 See [CONTRIBUTING.md](CONTRIBUTING.md) for workflow and guidelines.
