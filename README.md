@@ -45,7 +45,7 @@ $ similarity-d --threshold=0.8 --min-lines=3 --dir=source --exclude-nested
 # disable cross-file comparisons
 $ similarity-d --threshold=0.8 --cross-file=false
 $ similarity-d --version
-0.1.0
+0.2.0
 ```
 
 ## Remarks
